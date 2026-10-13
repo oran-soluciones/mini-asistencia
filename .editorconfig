@@ -18,3 +18,9 @@ indent_size = unset
 end_of_line = unset
 insert_final_newline = unset
 trim_trailing_whitespace = unset
+
+# Bodies de ejemplo con tabs y tab final (formato del reloj): no tocar
+[tests/fixtures/**]
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = unset

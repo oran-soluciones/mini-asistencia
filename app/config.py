@@ -11,8 +11,9 @@ if os.name == "nt":
 else:
   DATA_DIR = Path.home() / ".local" / "share" / "mini-asistencia"
 LOG_DIR = DATA_DIR / "logs"
+DB_PATH = DATA_DIR / "asistencia.db"
 
-# Requests reales capturados del reloj (van al repo, se usan en tests)
+# Requests reales capturados del reloj (local, fuera de Git; los tests usan tests/fixtures/)
 SAMPLES_DIR = Path(__file__).resolve().parent.parent / "samples"
 
 for _d in (DATA_DIR, LOG_DIR, SAMPLES_DIR):

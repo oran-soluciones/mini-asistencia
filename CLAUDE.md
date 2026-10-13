@@ -35,6 +35,8 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 - Ejecutar todo con el Python del venv: `.venv\Scripts\python.exe` en Windows,
   `.venv/bin/python` en Linux (o activar con `.venv\Scripts\Activate.ps1`).
 - Dependencias fijadas en `requirements.txt`; `.venv/` va en `.gitignore`.
+- Tests: `.venv\Scripts\python.exe -m pip install -r requirements-dev.txt` y luego
+  `.venv\Scripts\python.exe -m pytest -q` (usan `tests/fixtures/`, base y samples temporales).
 
 ## Reglas
 - Priorizar simplicidad: pocos archivos, pocas dependencias, nada de sobre-ingeniería.
