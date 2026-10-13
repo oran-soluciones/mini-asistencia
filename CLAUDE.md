@@ -7,6 +7,10 @@ el protocolo ADMS/PUSH (HTTP, rutas `/iclock/...`). Reemplaza a ZKBio Time.
   autenticado con GitHub CLI `gh`, sin SSH)
 - Carpeta local: `D:\Programas\oran-soluciones\mini-asistencia`
 
+## Contexto del cliente
+- Lo usa un colegio. Solo horario diurno: no hay turnos nocturnos ni cruce de medianoche.
+- Por ahora se marca solo entrada y salida (sin almuerzo); no hay turnos ni horarios cargados.
+
 ## Contexto del equipo
 - ZKTeco Horus TL2, solo reconocimiento facial, conexión Wi-Fi.
 - Firmware ZMM510-NF-Ver 1.0.21. En "Config SVR de nube" solo ofrece modo ADMS (no BEST),
