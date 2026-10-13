@@ -54,6 +54,9 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 - No asumir campos del protocolo sin verificarlos contra lo que realmente manda el reloj.
   Si algo no está en `samples/`, se marca como "no verificado".
 - Las marcaciones nunca se pierden ni se duplican: clave única (SN, PIN, fecha-hora).
+- Reporte Excel (`/marcaciones/excel`, `app/reports.py`): Horas = última - primera marcación del día
+  (solo entrada/salida; no contempla almuerzo, turnos ni horarios ni cruza la medianoche). Marcaciones
+  a menos de 2 min de la anterior se ignoran y se anotan en Observación.
 - Los datos del usuario (SQLite, logs) van en una carpeta de datos del usuario
   (en Windows `%LOCALAPPDATA%\mini-asistencia`), nunca al lado del `.exe`.
 - Esperar aprobación del usuario antes de empezar cada etapa.

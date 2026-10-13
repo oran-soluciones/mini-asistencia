@@ -52,6 +52,7 @@ h2 { margin-top: 0; }
 }
 .filtros button { background: var(--acento); border-color: var(--acento); color: #fff; cursor: pointer; }
 .boton { text-decoration: none; }
+.filtros button.secundario { background: #fff; border-color: var(--borde); color: var(--texto); }
 
 /* En pantallas angostas la tabla se desplaza en horizontal */
 #tabla-marcaciones, .tabla-scroll { overflow-x: auto; }

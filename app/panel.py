@@ -10,11 +10,11 @@ from pathlib import Path
 from urllib.parse import urlencode, urlsplit
 
 from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app import db
+from app import db, reports
 from app.config import PORT
 from app.iclock import comando_baja, comando_usuario
 
@@ -25,6 +25,7 @@ RELOJ_CONECTADO_SEGUNDOS = 30  # último contacto más reciente que esto = reloj
 ADMIN = 14  # privilegio de administrador (deducido del único usuario real, no verificado)
 PRIVILEGIOS = {0: "Usuario", ADMIN: "Administrador"}
 NOMBRE_MAX = 24
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 _LOCALES = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
 _PIN_RE = re.compile(r"[1-9][0-9]{0,8}")
 
@@ -95,25 +96,36 @@ def _fecha(valor: str | None) -> str | None:
     return None
 
 
-def _contexto_marcaciones(request: Request) -> dict:
+def _filtros(request: Request) -> tuple[str | None, str | None, str | None]:
+  """(desde, hasta, pin) de la URL; los usan la tabla y el Excel."""
   q = request.query_params
   if "desde" not in q and "hasta" not in q:  # sin filtros de fecha: el día de hoy
     desde = hasta = date.today().isoformat()
   else:
     desde, hasta = _fecha(q.get("desde")), _fecha(q.get("hasta"))
-  pin = q.get("pin") or None
+  return desde, hasta, q.get("pin") or None
+
+
+def _contexto_marcaciones(request: Request) -> dict:
+  desde, hasta, pin = _filtros(request)
   filas, truncado = db.listar_marcaciones(desde, hasta, pin, LIMITE_FILAS)
   return {
     "filas": filas,
     "truncado": truncado,
     "limite": LIMITE_FILAS,
     # La URL del refresco repite los filtros tal cual llegaron (sin filtros = siempre "hoy")
-    "refresco": "/marcaciones/tabla?" + urlencode(list(q.items())),
+    "refresco": "/marcaciones/tabla?" + urlencode(list(request.query_params.items())),
     "ahora": datetime.now().strftime("%H:%M:%S"),
     "desde": desde or "",
     "hasta": hasta or "",
     "pin": pin or "",
   }
+
+
+@router.get("/favicon.ico")
+def favicon():
+  """El navegador lo pide solo; se responde acá para que no caiga en el espía (samples)."""
+  return Response(status_code=204)
 
 
 @router.get("/")
@@ -133,6 +145,19 @@ def marcaciones_tabla(request: Request):
   """Parcial HTMX: solo la tabla (se refresca sola cada pocos segundos)."""
   return templates.TemplateResponse(request, "_tabla_marcaciones.html",
                                     _contexto_marcaciones(request))
+
+
+@router.get("/marcaciones/excel")
+def marcaciones_excel(request: Request):
+  """Descarga .xlsx con los mismos filtros que /marcaciones, sin el límite de filas de la tabla."""
+  desde, hasta, pin = _filtros(request)
+  filas, truncado = db.listar_marcaciones(desde, hasta, pin, reports.LIMITE_EXCEL)
+  emp = db.obtener_empleado(pin) if pin else None
+  contenido = reports.generar_excel(
+    reversed(filas), desde, hasta, pin, emp["nombre"] if emp else None, truncado)
+  nombre = f"asistencia_{desde or 'todo'}_{hasta or 'todo'}.xlsx"
+  return Response(contenido, media_type=XLSX,
+                  headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
 
 
 def error_pin(pin: str) -> str | None:
