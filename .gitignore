@@ -4,7 +4,9 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# Datos locales
+# Datos locales (samples crudos del reloj: tienen contraseñas, SN, MAC)
+samples/*
+!samples/.gitkeep
 *.db
 *.sqlite3
 logs/

@@ -41,7 +41,8 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 - Indentación: 2 espacios en todos los archivos (Python incluido), nunca tabs. Fin de línea LF.
   Lo fijan `.editorconfig`, `.gitattributes` y `.vscode/settings.json`.
 - Loguear SIEMPRE el request crudo que manda el reloj (método, URL, query, headers, body)
-  y guardar ejemplos reales en `samples/` para usarlos en tests.
+  y guardar ejemplos reales en `samples/`. `samples/` es local y NO se sube a Git (tiene
+  contraseñas, SN, MAC). Los tests usan copias anonimizadas en `tests/fixtures/`.
 - No asumir campos del protocolo sin verificarlos contra lo que realmente manda el reloj.
   Si algo no está en `samples/`, se marca como "no verificado".
 - Las marcaciones nunca se pierden ni se duplican: clave única (SN, PIN, fecha-hora).
@@ -65,8 +66,8 @@ mini-asistencia/
 │  ├─ reports.py     # exportación a Excel (openpyxl)
 │  ├─ templates/     # Jinja2: base, marcaciones, empleados, parciales HTMX
 │  └─ static/        # htmx.min.js (local, sin CDN), style.css, ícono
-├─ samples/          # requests reales capturados del reloj
-├─ tests/            # pytest usando samples/
+├─ samples/          # requests reales capturados del reloj (local, fuera de Git)
+├─ tests/            # pytest; tests/fixtures/ = samples anonimizados
 └─ .github/workflows/build-windows.yml
 ```
 
@@ -76,7 +77,7 @@ mini-asistencia/
    en `samples/` y responde lo mínimo para que el reloj siga hablando. Objetivo: descubrir
    qué rutas y formato usa realmente este firmware.
 2. **Marcaciones**: parsear ATTLOG según los samples reales, guardar en SQLite sin duplicados,
-   tests con samples.
+   tests con fixtures anonimizados sacados de los samples.
 3. **Panel de lectura**: lista de marcaciones (filtros por fecha/empleado) y empleados.
 4. **ABM de empleados**: cola de comandos en SQLite, entrega por `/iclock/getrequest`,
    confirmación por `/iclock/devicecmd`, estado visible en el panel.
@@ -85,9 +86,25 @@ mini-asistencia/
    que genera el `.exe` en `windows-latest`.
 7. **Prueba en Windows real**: firewall, IP fija, arranque, reinicio de PC.
 
+## Protocolo verificado (etapa 1, 2026-10-13)
+Variante PUSH clásica (`PushVersion=Ver 2.0.33S-20211012`, user-agent `iClock Proxy/1.09`).
+Sin `/iclock/registry` ni `/iclock/push`. Todos los bodies son `text/plain`.
+- `GET /iclock/cdata?SN=..&options=all&language=101&pushver=2.4.1&PushOptionsFlag=1`: saludo;
+  acepta la respuesta `GET OPTION FROM: <SN>` + `clave=valor` por línea (ver `iclock.py`).
+- `POST /iclock/cdata?SN=..&table=options`: info del equipo en una línea `clave=valor,...`
+  (algunas claves con `~`).
+- `POST /iclock/cdata?SN=..&table=ATTLOG&Stamp=..`: una marcación por línea, separada por tab:
+  `PIN  YYYY-MM-DD HH:MM:SS  estado  verificación  0 0 0 0 0 0` (con tab final). Llegan en
+  lote las guardadas y luego en tiempo real, una por POST. `15` en verificación = cara
+  (deducido, no verificado).
+- `POST /iclock/cdata?SN=..&table=OPERLOG&OpStamp=..`: líneas `OPLOG ...` (tab) y también
+  `USER PIN=..<tab>Name=..<tab>Pri=..<tab>Passwd=..<tab>Card=..<tab>Grp=..<tab>TZ=..<tab>Verify=..`.
+- `GET /iclock/getrequest?SN=..` cada 2-5 s (la primera trae `INFO=fw,usuarios,?,marcaciones,ip,...`).
+  Respondemos `OK` = sin comandos.
+- `/iclock/devicecmd`: todavía no visto (aparece cuando se le manden comandos).
+- El reloj tenía la hora ~4 min 20 s adelantada respecto de la PC.
+
 ## Riesgos y dudas a verificar
-- Variante del protocolo según firmware (clásico `cdata`/`getrequest` vs. versiones nuevas con
-  `/iclock/registry` y `/iclock/push`). Lo resuelve la etapa 1.
 - Codificación de nombres (tildes, ñ) que acepta el reloj.
 - Si `DATA UPDATE USERINFO` sobre un PIN existente conserva la cara registrada.
 - Firewall de Windows (regla de entrada en el puerto; red marcada como "Pública" bloquea).
