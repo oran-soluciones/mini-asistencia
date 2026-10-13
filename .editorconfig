@@ -24,3 +24,10 @@ trim_trailing_whitespace = unset
 indent_style = unset
 indent_size = unset
 trim_trailing_whitespace = unset
+
+# Librería vendorizada (htmx 2.0.4, tal cual se descarga): no tocar
+[app/static/htmx.min.js]
+indent_style = unset
+indent_size = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titulo %}Marcaciones{% endblock %}
+{% block contenido %}
+<h2>Marcaciones</h2>
+<form method="get" action="/marcaciones" class="filtros">
+  <label>Desde <input type="date" name="desde" value="{{ desde }}"></label>
+  <label>Hasta <input type="date" name="hasta" value="{{ hasta }}"></label>
+  <label>Empleado
+    <select name="pin">
+      <option value="">Todos</option>
+      {% for p in pins %}
+      <option value="{{ p.pin }}"{% if p.pin == pin %} selected{% endif %}>{{ p.pin }}{% if p.nombre %} - {{ p.nombre }}{% endif %}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Filtrar</button>
+  <a href="/marcaciones?desde=&amp;hasta=" class="boton">Ver todo</a>
+</form>
+{% include "_tabla_marcaciones.html" %}
+{% endblock %}

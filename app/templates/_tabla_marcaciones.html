@@ -1,0 +1,28 @@
+<div id="tabla-marcaciones" hx-get="{{ refresco }}" hx-trigger="every 5s" hx-swap="outerHTML">
+  {% if truncado %}
+  <p class="aviso">Se muestran solo las {{ limite }} marcaciones más nuevas; hay más. Acotá el rango de fechas o elegí un empleado.</p>
+  {% endif %}
+  <table>
+    <thead>
+      <tr><th>Fecha y hora</th><th>PIN</th><th>Nombre</th><th>Verificación</th><th>Reloj (SN)</th></tr>
+    </thead>
+    <tbody>
+      {% for m in filas %}
+      <tr>
+        <td>{{ m.fecha_hora }}</td>
+        <td>{{ m.pin }}</td>
+        <td>{{ m.nombre or "" }}</td>
+        <td>
+          {%- if m.verificacion == 15 %}<span title="15 = cara (deducido, no verificado)">Cara</span>
+          {%- elif m.verificacion is none %}-
+          {%- else %}{{ m.verificacion }}{% endif -%}
+        </td>
+        <td>{{ m.sn }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="vacio">No hay marcaciones para este filtro.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="pie">{{ filas|length }} marcaciones. Actualizado {{ ahora }} (se refresca cada 5 s).</p>
+</div>

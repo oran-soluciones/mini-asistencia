@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Empleados{% endblock %}
+{% block contenido %}
+<h2>Empleados</h2>
+<div class="tabla-scroll">
+  <table>
+    <thead>
+      <tr><th>PIN</th><th>Nombre</th><th>Privilegio</th><th>Tarjeta</th><th>Grupo</th><th>Última actualización</th><th>Marcaciones</th></tr>
+    </thead>
+    <tbody>
+      {% for e in empleados %}
+      <tr>
+        <td>{{ e.pin }}</td>
+        <td>{{ e.nombre }}</td>
+        <td>{{ "" if e.privilegio is none else e.privilegio }}</td>
+        <td>{{ e.tarjeta or "" }}</td>
+        <td>{{ "" if e.grupo is none else e.grupo }}</td>
+        <td>{{ e.actualizado }}</td>
+        <td>{{ e.marcaciones }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="vacio">Todavía no se recibieron empleados del reloj.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="pie">Los empleados se cargan solos cuando el reloj los informa.</p>
+{% endblock %}

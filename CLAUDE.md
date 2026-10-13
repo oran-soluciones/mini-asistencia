@@ -38,6 +38,12 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 - Tests: `.venv\Scripts\python.exe -m pip install -r requirements-dev.txt` y luego
   `.venv\Scripts\python.exe -m pytest -q` (usan `tests/fixtures/`, base y samples temporales).
 
+- Variables de entorno (pruebas manuales sin tocar los datos reales): `MINI_ASISTENCIA_PORT`,
+  `MINI_ASISTENCIA_DATA_DIR` (base + logs) y `MINI_ASISTENCIA_SAMPLES_DIR`.
+- Panel: solo responde a 127.0.0.1 / ::1 (403 al resto); abrirlo con `http://localhost:<puerto>/`,
+  no con la IP de la PC. `/iclock/*` y cualquier ruta desconocida siguen abiertos (los captura
+  el espía). El router del panel va ANTES que el de iclock (ver `app/main.py`).
+
 ## Reglas
 - Priorizar simplicidad: pocos archivos, pocas dependencias, nada de sobre-ingeniería.
 - Indentación: 2 espacios en todos los archivos (Python incluido), nunca tabs. Fin de línea LF.

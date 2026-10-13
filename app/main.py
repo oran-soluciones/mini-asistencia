@@ -1,4 +1,4 @@
-"""Punto de entrada. Etapa 1: solo el servidor espía (sin panel ni bandeja todavía).
+"""Punto de entrada: servidor /iclock (reloj) + panel web local (sin bandeja todavía).
 
 Uso: .venv\\Scripts\\python.exe -m app.main
 """
@@ -7,7 +7,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
-from app import iclock
+from app import iclock, panel
 from app.config import HOST, LOG_DIR, PORT, SAMPLES_DIR
 
 logging.basicConfig(
@@ -20,13 +20,14 @@ logging.basicConfig(
 )
 
 app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+panel.instalar(app)  # antes que iclock: su comodín /{path:path} captura todo lo demás
 app.include_router(iclock.router)
 
 
 def main() -> None:
-  logging.getLogger("iclock").info(
-    "Escuchando en %s:%s | samples: %s | log: %s", HOST, PORT, SAMPLES_DIR, LOG_DIR
-  )
+  log = logging.getLogger("iclock")
+  log.info("Escuchando en %s:%s | samples: %s | log: %s", HOST, PORT, SAMPLES_DIR, LOG_DIR)
+  log.info("Panel (solo desde esta PC): http://localhost:%s/", PORT)
   uvicorn.run(app, host=HOST, port=PORT, log_config=None)
 
 
