@@ -28,6 +28,13 @@ Python 3.12, FastAPI + Uvicorn, SQLite (módulo `sqlite3` estándar, sin ORM),
 Jinja2 + HTMX para el panel, openpyxl, PyInstaller, pystray.
 Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 
+## Entorno Python
+- Siempre trabajar dentro de un entorno virtual `.venv` en la raíz del proyecto
+  (`py -3.12 -m venv .venv`). Nunca instalar paquetes en el Python global.
+- Ejecutar todo con el Python del venv: `.venv\Scripts\python.exe` en Windows,
+  `.venv/bin/python` en Linux (o activar con `.venv\Scripts\Activate.ps1`).
+- Dependencias fijadas en `requirements.txt`; `.venv/` va en `.gitignore`.
+
 ## Reglas
 - Priorizar simplicidad: pocos archivos, pocas dependencias, nada de sobre-ingeniería.
 - Loguear SIEMPRE el request crudo que manda el reloj (método, URL, query, headers, body)

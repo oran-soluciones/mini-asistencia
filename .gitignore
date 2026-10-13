@@ -1,0 +1,20 @@
+# Entorno
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Datos locales
+*.db
+*.sqlite3
+logs/
+*.log
+
+# Build (PyInstaller)
+build/
+dist/
+
+# Editor / SO
+.vscode/
+.idea/
+Thumbs.db
