@@ -3,7 +3,8 @@
 Sistema simple y gratuito de control de asistencia para relojes biométricos ZKTeco que usan
 el protocolo ADMS/PUSH (HTTP, rutas `/iclock/...`). Reemplaza a ZKBio Time.
 
-- Repo: `git@github.com:oran-soluciones/mini-asistencia.git` (rama `main`)
+- Repo: `https://github.com/oran-soluciones/mini-asistencia.git` (rama `main`; acceso por HTTPS
+  autenticado con GitHub CLI `gh`, sin SSH)
 - Carpeta local: `D:\Programas\oran-soluciones\mini-asistencia`
 
 ## Contexto del equipo
@@ -68,7 +69,7 @@ mini-asistencia/
 ```
 
 ## Etapas
-0. **Preparación**: repo, SSH, venv con Python 3.12, `.gitignore`.
+0. **Preparación**: repo (HTTPS), venv con Python 3.12, `.gitignore`.
 1. **Servidor espía**: ruta comodín `/iclock/{path}` que loguea todo crudo, guarda cada request
    en `samples/` y responde lo mínimo para que el reloj siga hablando. Objetivo: descubrir
    qué rutas y formato usa realmente este firmware.
