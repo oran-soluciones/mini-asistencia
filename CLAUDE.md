@@ -115,8 +115,10 @@ Sin `/iclock/registry` ni `/iclock/push`. Todos los bodies son `text/plain`.
   no vistos todavía).
 - Alta verificada: `DATA UPDATE USERINFO PIN=..<tab>Name=..<tab>Pri=0<tab>Passwd=<tab>Card=<tab>Grp=1
   <tab>TZ=0000000000000000<tab>Verify=0<tab>ViceCard=<tab>StartDatetime=0<tab>EndDatetime=0`.
-  NO VERIFICADOS aún: modificación (¿conserva la cara?), `DATA DELETE USERINFO PIN=..`, tildes/ñ,
-  `Pri=14` = admin. Un comando por `getrequest`, reentrega a los 2 min sin confirmar (hasta 3
+  También verificados (2026-10-13, PIN 99, todos `Return=0` al primer intento): modificación con el
+  mismo comando (el usuario comprobó en el reloj que conserva la cara), nombres en UTF-8 con tildes
+  y ñ (`Pepé Muñoz`, se ven bien en el reloj) y `DATA DELETE USERINFO PIN=..`. NO VERIFICADOS aún:
+  `Pri=14` = admin; si `Passwd=`/`Card=` vacíos borran una contraseña/tarjeta existente. Un comando por `getrequest`, reentrega a los 2 min sin confirmar (hasta 3
   entregas). Admins (Pri=14) no se tocan desde el panel.
 - El reloj sube cada dato UNA sola vez (incremental, con su propio stamp): reiniciarlo no reenvía
   marcaciones ni usuarios ya enviados, aunque respondamos `ATTLOGStamp=None`.
