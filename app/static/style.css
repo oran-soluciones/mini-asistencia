@@ -64,3 +64,22 @@ span[title] { text-decoration: underline dotted; cursor: help; }
 
 .aviso { background: var(--aviso); border: 1px solid #e6cf8b; padding: 0.5rem 0.75rem; border-radius: 4px; }
 .pie { color: var(--suave); font-size: 0.85rem; }
+
+/* Empleados: reloj, formularios, estados de comandos */
+.reloj { padding: 0.5rem 0.75rem; border-radius: 4px; margin-bottom: 1rem; border: 1px solid var(--borde); background: #fff; }
+.reloj.conectado { background: #e3f4e7; border-color: #9fd3ab; color: #1e5a2e; }
+.reloj.sin-contacto { background: #fbe4e4; border-color: #e3a4a4; color: #8a2424; }
+.reloj.nunca { background: #eceef1; color: var(--suave); }
+
+.error { background: #fbe4e4; border: 1px solid #e3a4a4; color: #8a2424; padding: 0.5rem 0.75rem; border-radius: 4px; }
+.suave { color: var(--suave); font-size: 0.85rem; }
+form.en-linea { display: inline; }
+.boton, button { cursor: pointer; }
+button.peligro { font: inherit; padding: 0.35rem 0.5rem; border: 1px solid #c98a8a; border-radius: 4px; background: #fff; color: #8a2424; }
+button.peligro:hover { background: #fbe4e4; }
+
+.estado { display: inline-block; padding: 0 0.5rem; border-radius: 10px; font-size: 0.85rem; border: 1px solid var(--borde); background: #eceef1; color: var(--suave); }
+.estado.est-enviado { background: #e1ecf8; border-color: #a9c3e3; color: #1d4e89; }
+.estado.est-ok { background: #e3f4e7; border-color: #9fd3ab; color: #1e5a2e; }
+.estado.est-error { background: #fbe4e4; border-color: #e3a4a4; color: #8a2424; }
+.estado.est-pendiente { background: #fff4d6; border-color: #e6cf8b; color: #7a5b00; }

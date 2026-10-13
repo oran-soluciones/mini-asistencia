@@ -87,6 +87,6 @@ def test_endpoint_error_de_base_no_responde_ok(client, monkeypatch):
 
 
 def test_otras_rutas_siguen_respondiendo_ok(client, db_path):
-  r = client.get("/iclock/getrequest?SN=TESTSN0001")
+  r = client.get("/iclock/ping?SN=TESTSN0001")
   assert (r.status_code, r.text) == (200, "OK")
   assert not db_path.exists()

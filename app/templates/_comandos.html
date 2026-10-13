@@ -1,0 +1,26 @@
+<div id="comandos"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <h3>Últimos comandos</h3>
+  <div class="tabla-scroll">
+    <table class="comandos">
+      <thead>
+        <tr class="encabezado"><th>Id</th><th>Tipo</th><th>PIN</th><th>Estado</th><th>Entregas</th><th>Creado</th><th>Enviado</th><th>Confirmado</th></tr>
+      </thead>
+      <tbody>
+        {% for c in comandos %}
+        <tr class="fila-{{ c.estado }}">
+          <td>{{ c.id }}</td>
+          <td>{{ c.tipo }}</td>
+          <td>{{ c.pin }}</td>
+          <td><span class="estado est-{{ c.estado }}">{{ etiqueta_estado(c.estado, c.codigo_retorno) }}</span></td>
+          <td>{{ c.intentos }}</td>
+          <td>{{ c.creado }}</td>
+          <td>{{ c.enviado or "" }}</td>
+          <td>{{ c.confirmado or "" }}</td>
+        </tr>
+        {% else %}
+        <tr class="fila-vacia"><td colspan="8" class="vacio">Todavía no se envió ningún comando.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

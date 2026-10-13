@@ -1,7 +1,7 @@
 """Base SQLite: esquema y consultas (sqlite3 estándar, sin ORM)."""
 import sqlite3
 from contextlib import closing
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from app.config import DB_PATH
@@ -28,7 +28,39 @@ CREATE TABLE IF NOT EXISTS empleados (
   sn TEXT NOT NULL,          -- reloj que mandó el dato
   actualizado TEXT NOT NULL  -- timestamp de la PC al recibirlo
 );
+CREATE TABLE IF NOT EXISTS relojes (
+  sn TEXT PRIMARY KEY,
+  ultimo_contacto TEXT NOT NULL  -- último getrequest recibido
+);
+CREATE TABLE IF NOT EXISTS comandos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  sn TEXT NOT NULL,          -- reloj destino
+  pin TEXT NOT NULL,
+  tipo TEXT NOT NULL,        -- alta | modificacion | baja
+  texto TEXT NOT NULL,       -- comando sin el prefijo "C:<id>:"
+  estado TEXT NOT NULL,      -- pendiente | enviado | ok | error
+  codigo_retorno INTEGER,    -- Return= del reloj (NULL si no confirmó)
+  intentos INTEGER NOT NULL DEFAULT 0,
+  creado TEXT NOT NULL,
+  enviado TEXT,              -- última entrega
+  confirmado TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_comandos_pin ON comandos (pin);
 """
+
+# Un comando 'enviado' sin confirmación se vuelve a entregar a los REINTENTO_SEGUNDOS, hasta
+# MAX_ENTREGAS veces; si tampoco así confirma pasa a 'error' (codigo_retorno NULL).
+REINTENTO_SEGUNDOS = 120
+MAX_ENTREGAS = 3
+
+
+def ahora() -> datetime:
+  """Hora de la PC (los tests la reemplazan para no esperar)."""
+  return datetime.now()
+
+
+def _ts(momento: datetime | None = None) -> str:
+  return (momento or ahora()).isoformat(sep=" ", timespec="seconds")
 
 
 def connect(path: Path | None = None) -> sqlite3.Connection:
@@ -47,7 +79,7 @@ def insert_marcaciones(sn: str, marcaciones: list, path: Path | None = None) -> 
 
   Devuelve cuántas eran nuevas. Si algo falla no se guarda ninguna (transacción).
   """
-  recibido = datetime.now().isoformat(sep=" ", timespec="seconds")
+  recibido = _ts()
   filas = [(sn, m.pin, m.fecha_hora, m.estado, m.verificacion, m.raw, recibido)
            for m in marcaciones]
   with closing(connect(path)) as conn, conn:
@@ -65,7 +97,7 @@ def upsert_empleados(sn: str, usuarios: list, path: Path | None = None) -> int:
 
   Devuelve cuántos registros se procesaron. Si algo falla no se guarda ninguno.
   """
-  actualizado = datetime.now().isoformat(sep=" ", timespec="seconds")
+  actualizado = _ts()
   filas = [(u.pin, u.nombre, u.privilegio, u.tarjeta, u.grupo, sn, actualizado)
            for u in usuarios]
   with closing(connect(path)) as conn, conn:
@@ -120,13 +152,139 @@ def listar_pins(path: Path | None = None) -> list[sqlite3.Row]:
     ).fetchall()
 
 
+_SQL_EMPLEADOS = (
+  "SELECT e.pin, e.nombre, e.privilegio, e.tarjeta, e.grupo, e.sn, e.actualizado,"
+  " COALESCE(m.total, 0) AS marcaciones,"
+  " c.id AS cmd_id, c.tipo AS cmd_tipo, c.estado AS cmd_estado, c.codigo_retorno AS cmd_codigo,"
+  " COALESCE(c.tipo = 'baja' AND c.estado IN ('pendiente', 'enviado'), 0) AS baja_pendiente"
+  " FROM empleados e"
+  " LEFT JOIN (SELECT pin, COUNT(*) AS total FROM marcaciones GROUP BY pin) m ON m.pin = e.pin"
+  " LEFT JOIN comandos c ON c.id = (SELECT MAX(id) FROM comandos WHERE pin = e.pin)"
+)
+
+
 def listar_empleados(path: Path | None = None) -> list[sqlite3.Row]:
-  """Empleados con la cantidad de marcaciones de cada uno."""
+  """Empleados con la cantidad de marcaciones y el estado de su último comando."""
   with closing(connect(path)) as conn:
     return conn.execute(
-      "SELECT e.pin, e.nombre, e.privilegio, e.tarjeta, e.grupo, e.actualizado,"
-      " COALESCE(c.total, 0) AS marcaciones"
-      " FROM empleados e"
-      " LEFT JOIN (SELECT pin, COUNT(*) AS total FROM marcaciones GROUP BY pin) c ON c.pin = e.pin"
-      " ORDER BY CAST(e.pin AS INTEGER), e.pin"
+      _SQL_EMPLEADOS + " ORDER BY CAST(e.pin AS INTEGER), e.pin"
+    ).fetchall()
+
+
+def obtener_empleado(pin: str, path: Path | None = None) -> sqlite3.Row | None:
+  with closing(connect(path)) as conn:
+    return conn.execute(_SQL_EMPLEADOS + " WHERE e.pin = ?", (pin,)).fetchone()
+
+
+def registrar_contacto(sn: str, path: Path | None = None) -> None:
+  """Anota que el reloj `sn` acaba de hacer un getrequest."""
+  with closing(connect(path)) as conn, conn:
+    conn.execute(
+      "INSERT INTO relojes (sn, ultimo_contacto) VALUES (?, ?)"
+      " ON CONFLICT (sn) DO UPDATE SET ultimo_contacto = excluded.ultimo_contacto",
+      (sn, _ts()),
+    )
+
+
+def ultimo_reloj(path: Path | None = None) -> sqlite3.Row | None:
+  """El reloj que hizo contacto más recientemente (sn, ultimo_contacto), o None."""
+  with closing(connect(path)) as conn:
+    return conn.execute(
+      "SELECT sn, ultimo_contacto FROM relojes ORDER BY ultimo_contacto DESC, rowid DESC LIMIT 1"
+    ).fetchone()
+
+
+def _encolar(conn: sqlite3.Connection, sn: str, pin: str, tipo: str, texto: str) -> int:
+  return conn.execute(
+    "INSERT INTO comandos (sn, pin, tipo, texto, estado, creado)"
+    " VALUES (?, ?, ?, ?, 'pendiente', ?)",
+    (sn, pin, tipo, texto, _ts()),
+  ).lastrowid
+
+
+def encolar_comando(sn: str, pin: str, tipo: str, texto: str, path: Path | None = None) -> int:
+  """Encola un comando para el reloj `sn` (estado 'pendiente'). Devuelve su id."""
+  with closing(connect(path)) as conn, conn:
+    return _encolar(conn, sn, pin, tipo, texto)
+
+
+def guardar_empleado_y_encolar(tipo: str, sn: str, pin: str, nombre: str, privilegio: int,
+                               texto: str, path: Path | None = None) -> int:
+  """Alta ('alta': falla con ValueError si el PIN ya existe) o cambio ('modificacion') del
+  empleado local, más el comando para el reloj, en una sola transacción. Devuelve el id."""
+  with closing(connect(path)) as conn, conn:
+    if tipo == "alta":
+      try:
+        conn.execute(
+          "INSERT INTO empleados (pin, nombre, privilegio, tarjeta, grupo, sn, actualizado)"
+          " VALUES (?, ?, ?, '', 1, ?, ?)",
+          (pin, nombre, privilegio, sn, _ts()),
+        )
+      except sqlite3.IntegrityError:
+        raise ValueError(f"el PIN {pin} ya existe") from None
+    else:
+      conn.execute(
+        "UPDATE empleados SET nombre = ?, privilegio = ?, actualizado = ? WHERE pin = ?",
+        (nombre, privilegio, _ts(), pin),
+      )
+    return _encolar(conn, sn, pin, tipo, texto)
+
+
+def siguiente_comando(sn: str, path: Path | None = None) -> sqlite3.Row | None:
+  """Toma el próximo comando para entregar al reloj `sn` y lo marca 'enviado'.
+
+  Uno por vez y en orden: mientras haya uno 'enviado' de hace menos de REINTENTO_SEGUNDOS
+  no se entrega otro. Pasado ese tiempo sin confirmación se reentrega; tras MAX_ENTREGAS
+  entregas sin confirmar pasa a 'error' (sin código). Devuelve None si no hay nada.
+  """
+  momento = ahora()
+  limite = _ts(momento - timedelta(seconds=REINTENTO_SEGUNDOS))
+  with closing(connect(path)) as conn, conn:
+    conn.execute("BEGIN IMMEDIATE")
+    conn.execute(
+      "UPDATE comandos SET estado = 'error' WHERE sn = ? AND estado = 'enviado'"
+      " AND intentos >= ? AND enviado <= ?",
+      (sn, MAX_ENTREGAS, limite),
+    )
+    en_vuelo = conn.execute(
+      "SELECT 1 FROM comandos WHERE sn = ? AND estado = 'enviado' AND enviado > ?", (sn, limite)
+    ).fetchone()
+    if en_vuelo:
+      return None
+    filas = conn.execute(
+      "UPDATE comandos SET estado = 'enviado', enviado = ?, intentos = intentos + 1"
+      " WHERE id = (SELECT MIN(id) FROM comandos WHERE sn = ? AND estado IN ('pendiente', 'enviado'))"
+      " RETURNING *",
+      (_ts(momento), sn),
+    ).fetchall()  # completo: la transacción no puede cerrarse con el statement a medias
+    return filas[0] if filas else None
+
+
+def confirmar_comando(cmd_id: int, codigo: int, path: Path | None = None) -> bool:
+  """Registra la respuesta del reloj (Return=`codigo`: 0 = OK). Una baja OK borra al empleado.
+
+  Acepta comandos 'enviado' o 'error' (confirmación tardía). Devuelve False si no existe o
+  no estaba esperando confirmación (p. ej. ya confirmado).
+  """
+  with closing(connect(path)) as conn, conn:
+    fila = conn.execute(
+      "SELECT tipo, pin FROM comandos WHERE id = ? AND estado IN ('enviado', 'error')", (cmd_id,)
+    ).fetchone()
+    if fila is None:
+      return False
+    conn.execute(
+      "UPDATE comandos SET estado = ?, codigo_retorno = ?, confirmado = ? WHERE id = ?",
+      ("ok" if codigo == 0 else "error", codigo, _ts(), cmd_id),
+    )
+    if codigo == 0 and fila["tipo"] == "baja":
+      conn.execute("DELETE FROM empleados WHERE pin = ?", (fila["pin"],))
+    return True
+
+
+def listar_comandos(limite: int = 20, path: Path | None = None) -> list[sqlite3.Row]:
+  """Últimos comandos, el más nuevo primero."""
+  with closing(connect(path)) as conn:
+    return conn.execute(
+      "SELECT id, sn, pin, tipo, estado, codigo_retorno, intentos, creado, enviado, confirmado"
+      " FROM comandos ORDER BY id DESC LIMIT ?", (limite,)
     ).fetchall()

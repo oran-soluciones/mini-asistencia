@@ -109,7 +109,13 @@ Sin `/iclock/registry` ni `/iclock/push`. Todos los bodies son `text/plain`.
   `USER PIN=..<tab>Name=..<tab>Pri=..<tab>Passwd=..<tab>Card=..<tab>Grp=..<tab>TZ=..<tab>Verify=..`.
 - `GET /iclock/getrequest?SN=..` cada 2-5 s (la primera trae `INFO=fw,usuarios,?,marcaciones,ip,...`).
   Respondemos `OK` = sin comandos.
-- `/iclock/devicecmd`: todavía no visto (aparece cuando se le manden comandos).
+- `/iclock/devicecmd`: todavía no visto (aparece cuando se le manden comandos). NO VERIFICADO: la entrega de
+  comandos por `getrequest` (`C:<id>:<comando>`) ni la confirmación (`POST devicecmd`, body
+  `ID=<id>&Return=<n>&CMD=DATA`, `Return=0` = OK).
+- Formatos de comando usados (no verificados, etapa 4): `DATA UPDATE USERINFO PIN=..<tab>Name=..<tab>Pri=..
+  <tab>Passwd=<tab>Card=..<tab>Grp=..<tab>TZ=0000000000000000<tab>Verify=0<tab>ViceCard=<tab>
+  StartDatetime=0<tab>EndDatetime=0` y `DATA DELETE USERINFO PIN=..`. Un comando por `getrequest`,
+  reentrega a los 2 min sin confirmar (hasta 3 entregas). Admins (Pri=14) no se tocan desde el panel.
 - El reloj tenía la hora ~4 min 20 s adelantada respecto de la PC.
 
 ## Riesgos y dudas a verificar

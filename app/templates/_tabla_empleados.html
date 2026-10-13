@@ -1,0 +1,37 @@
+<div id="tabla-empleados" class="tabla-scroll" hx-get="/empleados/estado" hx-trigger="every 4s" hx-swap="outerHTML">
+  <table>
+    <thead>
+      <tr><th>PIN</th><th>Nombre</th><th>Privilegio</th><th>Tarjeta</th><th>Grupo</th><th>Última actualización</th><th>Marcaciones</th><th>Último comando</th><th>Acciones</th></tr>
+    </thead>
+    <tbody>
+      {% for e in empleados %}
+      <tr>
+        <td>{{ e.pin }}</td>
+        <td>{{ e.nombre }}</td>
+        <td>{% if e.privilegio is none %}{% else %}{{ PRIVILEGIOS.get(e.privilegio, "") }} ({{ e.privilegio }}){% endif %}</td>
+        <td>{{ e.tarjeta or "" }}</td>
+        <td>{{ "" if e.grupo is none else e.grupo }}</td>
+        <td>{{ e.actualizado }}</td>
+        <td>{{ e.marcaciones }}</td>
+        <td>
+          {%- if e.cmd_id %}<span class="estado est-{{ e.cmd_estado }}" title="comando #{{ e.cmd_id }}">{{ e.cmd_tipo }}: {{ etiqueta_estado(e.cmd_estado, e.cmd_codigo) }}</span>
+          {%- else %}-{% endif -%}
+        </td>
+        <td>
+          {%- if e.privilegio == ADMIN %}<span class="suave" title="Un cambio desde el panel podría borrarle la contraseña o dejar el reloj sin administrador">Administrador: se gestiona en el reloj</span>
+          {%- elif e.baja_pendiente %}<span class="estado est-pendiente">Baja pendiente</span>
+          {%- else %}
+          <a href="/empleados/{{ e.pin|urlencode }}/editar" class="boton">Editar</a>
+          <form method="post" action="/empleados/{{ e.pin|urlencode }}/baja" class="en-linea" data-msg="¿Dar de baja al empleado {{ e.nombre }} (PIN {{ e.pin }})? Se borra del reloj, con su cara." onsubmit="return confirm(this.dataset.msg)">
+            <button type="submit" class="peligro">Dar de baja</button>
+          </form>
+          {%- endif -%}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" class="vacio">Todavía no se recibieron empleados del reloj.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="pie">Actualizado {{ ahora }} (se refresca cada 4 s).</p>
+</div>
