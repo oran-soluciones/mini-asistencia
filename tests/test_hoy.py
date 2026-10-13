@@ -143,3 +143,60 @@ def test_hoy_navegacion_y_accesibilidad(client, db_path):
     assert f'<a href="{ruta}">' in html
   assert 'class="saltar"' in html and '<main id="contenido">' in html
   assert 'src="/static/panel.js"' in html
+
+
+def test_hoy_renglon_de_ultima_marcacion(client, db_path):
+  con_gente(db_path)
+  html = client.get("/hoy").text
+  # La más reciente es la de Zoe (se retiró 11:00); está en el título, fuera de la planilla
+  assert re.search(
+    r'<p id="hoy-ultima" class="ultima" data-clave="1\|2026-10-13 11:00:00">'
+    r'<span class="ultima-etq">Última marcación:</span> '
+    r'<span class="ultima-dato"><strong>Zoe Paz</strong> · Salida 11:00</span></p>', html)
+  assert html.index('id="hoy-ultima"') < html.index('id="hoy-conteos"') < html.index('<table')
+  # llega una entrada nueva: el renglón y su clave cambian en el parcial refrescado
+  cargar(db_path, [marcacion(2, f"{HOY} 11:42:00")])
+  parcial = client.get("/hoy/tabla").text
+  assert 'data-clave="2|2026-10-13 11:42:00"' in parcial
+  assert "<strong>Ana Gil</strong> · Entrada 11:42" in parcial
+  assert parcial.index('id="hoy-ultima"') < parcial.index('id="hoy-planilla"')
+
+
+def test_hoy_ultima_de_un_pin_sin_nombre(client, db_path):
+  cargar(db_path, [marcacion(77, f"{HOY} 09:15:00")])
+  assert "<strong>PIN 77 · sin nombre</strong> · Entrada 09:15" in client.get("/hoy").text
+
+
+def test_hoy_sin_marcaciones_no_hay_renglon(client, db_path):
+  emp(db_path, "USER PIN=1\tName=Zoe Paz\tPri=0\n")
+  html = client.get("/hoy").text
+  assert 'id="hoy-ultima"' not in html and "Última marcación" not in html
+  assert 'id="hoy-ultima"' not in client.get("/hoy/tabla").text
+
+
+def test_hoy_el_resumen_trae_los_conteos_que_el_cliente_entinta(client, db_path):
+  con_gente(db_path)
+  antes = client.get("/hoy/tabla").text
+  assert re.search(r'data-estado="sin_marcar">.*?<span class="n">2</span>', antes, re.S)
+  cargar(db_path, [marcacion(2, f"{HOY} 11:42:00")])
+  despues = client.get("/hoy/tabla").text
+  assert re.search(r'data-estado="en_colegio">.*?<span class="n">3</span>', despues, re.S)
+  assert re.search(r'data-estado="sin_marcar">.*?<span class="n">1</span>', despues, re.S)
+
+
+def test_entintado_del_resumen_en_panel_js_y_sin_animacion_con_movimiento_reducido(client):
+  js = client.get("/static/panel.js").text
+  assert "#hoy-ultima" in js and "dataset.clave" in js and ".ultima-dato" in js
+  assert "htmx:afterSwap" in js and "textContent" in js
+  css = client.get("/static/style.css").text
+  reducido = css[css.index("prefers-reduced-motion"):]
+  assert ".entintado { animation: none; }" in reducido
+
+
+def test_la_franja_abierta_ya_no_dibuja_un_recuadro_ni_cruza_la_linea_ahora(client):
+  css = client.get("/static/style.css").text
+  assert "left: 100%" not in css  # el recuadro hueco después de "ahora"
+  assert "@keyframes respira" in css
+  assert re.search(r"\.franja::after \{[^}]*width: 1\.5px[^}]*background: var\(--tinta\)", css)
+  assert not re.search(r"\.franja::after \{[^}]*opacity", css)
+  assert ".escala-ahora::after" in css  # la línea sigue dentro del encabezado

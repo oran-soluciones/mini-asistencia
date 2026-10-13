@@ -1,5 +1,8 @@
 {% from "_iconos.html" import ico %}
 <div id="hoy-titulo" class="titulo-fila"{% if oob %} hx-swap-oob="true"{% endif %}>
   <h1>{{ fecha_larga }}</h1>
+  {% if vista.ultima %}
+  <p id="hoy-ultima" class="ultima" data-clave="{{ vista.ultima.clave }}"><span class="ultima-etq">Última marcación:</span> <span class="ultima-dato"><strong>{{ vista.ultima.nombre or ("PIN " ~ vista.ultima.pin ~ " · sin nombre") }}</strong> · {{ vista.ultima.tipo }} {{ vista.ultima.hora }}</span></p>
+  {% endif %}
   <p class="hora-actual" title="Hora de esta PC">{{ ico("reloj") }}<time datetime="{{ dia_iso }}T{{ hora }}">{{ hora }}</time></p>
 </div>

@@ -1,7 +1,8 @@
 /* Panel de mini-asistencia: JS mínimo, sin dependencias (aparte de htmx).
    - Hoy: filtro por estado y buscador del lado del cliente; se conservan en la URL
      (?estado=&q=) y se vuelven a aplicar después de cada refresco de htmx.
-   - Hoy: "entintado" de la hora cuando el refresco trae una marcación nueva.
+   - Hoy: "entintado" cuando el refresco trae una marcación nueva: la celda de hora de la fila,
+     el renglón "Última marcación" y el número del segmento que cambió.
    - Aviso si el panel deja de responder; estado de carga del botón de Excel.
    - Configuración: vista previa del logo y del nombre. */
 (function () {
@@ -11,6 +12,8 @@
   var estado = "";
   var q = "";
   var ultimas = null; // pin -> data-ultima del render anterior (null: todavía no hubo ninguno)
+  var claveUltima = null; // data-clave del renglón "Última marcación" del render anterior
+  var conteos = null; // estado -> cantidad del render anterior
 
   function normalizar(texto) {
     return (texto || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -41,14 +44,33 @@
       actuales[pin] = ultima;
       if (ultimas !== null && ultima && ultimas[pin] !== ultima) {
         var celda = fila.querySelector(".c-" + (fila.dataset.celda || "entrada"));
-        if (celda) {
-          celda.classList.remove("entintado");
-          void celda.offsetWidth; // reinicia la animación si ya la tenía
-          celda.classList.add("entintado");
-        }
+        if (celda) entintarElemento(celda);
       }
     });
     ultimas = actuales;
+  }
+
+  function entintarElemento(elemento) {
+    elemento.classList.remove("entintado");
+    void elemento.offsetWidth; // reinicia la animación si ya la tenía
+    elemento.classList.add("entintado");
+  }
+
+  function entintarResumen(hoy) {
+    var renglon = hoy.querySelector("#hoy-ultima");
+    var clave = renglon ? renglon.dataset.clave : "";
+    if (claveUltima !== null && clave && clave !== claveUltima) {
+      entintarElemento(renglon.querySelector(".ultima-dato") || renglon);
+    }
+    claveUltima = clave;
+    var actuales = {};
+    hoy.querySelectorAll(".segmento").forEach(function (boton) {
+      var numero = boton.querySelector(".n");
+      var estadoBoton = boton.dataset.estado;
+      actuales[estadoBoton] = numero.textContent;
+      if (conteos !== null && conteos[estadoBoton] !== numero.textContent) entintarElemento(numero);
+    });
+    conteos = actuales;
   }
 
   function aplicar() {
@@ -73,6 +95,7 @@
     var limpiar = hoy.querySelector(".limpiar");
     if (limpiar) limpiar.hidden = !q;
     entintar(filas);
+    entintarResumen(hoy);
   }
 
   function quitarFiltros() {

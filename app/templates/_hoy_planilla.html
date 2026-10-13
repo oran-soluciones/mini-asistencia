@@ -40,7 +40,7 @@
         <td class="c-estado"><span class="chip est-{{ f.estado }}"><span class="punto" aria-hidden="true"></span>{{ ESTADOS[f.estado] }}</span></td>
         <td class="c-hora c-entrada" data-label="Entrada">{% if f.entrada %}{{ fmt_hm(f.entrada) }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">sin dato</span>{% endif %}</td>
         <td class="c-hora c-salida" data-label="Salida">{% if f.salida %}{{ fmt_hm(f.salida) }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">sin dato</span>{% endif %}</td>
-        <td class="c-horas" data-label="Horas">
+        <td class="c-horas" data-label="{{ 'Hasta ahora' if f.horas_parcial else 'Horas' }}">
           {%- if f.horas is not none %}
           <span class="{{ 'horas parcial' if f.horas_parcial else 'horas' }}">{{ fmt_horas(f.horas) }}</span>{% if f.horas_parcial %}<span class="sub">hasta ahora</span>{% endif %}
           {%- else %}<span aria-hidden="true">–</span><span class="sr-only">sin dato</span>{% endif -%}

@@ -10,6 +10,7 @@ Reglas del resumen por día (una fila por empleado y día calendario):
 - Repetidas: una marcación a menos de 2 minutos de la última marcación válida (típico de
   marcar dos veces seguidas) se ignora. Se cuentan en la Observación; Cantidad es el total real.
 - Una sola marcación válida: sin Salida, 0 horas. Más de dos: se usan la primera y la última.
+  Si ese día es hoy (exportación a media jornada) no es un error: dice "Sin salida todavía".
 - No se cruza la medianoche: cada día calendario se calcula por separado (un turno nocturno
   aparece como dos días incompletos).
 
@@ -66,16 +67,18 @@ class Resumen(NamedTuple):
   cantidad: int  # marcaciones reales del día (con repetidas)
   horas: timedelta
   observacion: str
+  alerta: bool = True  # False: la observación es solo informativa (no va en ámbar)
 
 
 def _clave_pin(pin: str) -> tuple:
   return (0, int(pin), pin) if pin.isdigit() else (1, 0, pin)
 
 
-def resumen_por_dia(filas) -> list[Resumen]:
+def resumen_por_dia(filas, ahora: datetime | None = None) -> list[Resumen]:
   """`filas`: marcaciones con `fecha_hora` (YYYY-MM-DD HH:MM:SS), `pin` y `nombre` (o None).
 
-  Devuelve una fila por (día, empleado), ordenadas por día y luego PIN.
+  Devuelve una fila por (día, empleado), ordenadas por día y luego PIN. `ahora` (la hora de la
+  exportación) permite distinguir "falta la salida" de un día pasado de "sin salida todavía".
   """
   grupos: dict[tuple, tuple[str, list[datetime]]] = {}
   for f in filas:
@@ -89,14 +92,19 @@ def resumen_por_dia(filas) -> list[Resumen]:
     obs = []
     if j.repetidas:
       obs.append(f"{j.repetidas} repetida(s) ignorada(s)")
+    alerta = bool(obs)
     if len(j.validas) == 1:
-      obs.append("Falta la salida (o la entrada)")
+      en_curso = ahora is not None and dia == ahora.date()
+      obs.append("Sin salida todavía" if en_curso else "Falta la salida (o la entrada)")
+      alerta = alerta or not en_curso
     elif len(j.validas) > 2:
       obs.append(f"{len(j.validas) - 2} marcaciones intermedias (se usó la primera y la última)")
+      alerta = True
     resultado.append(Resumen(
       fecha=datetime.combine(dia, datetime.min.time()), pin=pin, nombre=nombre,
       entrada=j.entrada, salida=j.salida, cantidad=len(momentos),
       horas=j.salida - j.entrada if j.salida else timedelta(0), observacion="; ".join(obs),
+      alerta=alerta,
     ))
   return resultado
 
@@ -211,7 +219,7 @@ def generar_excel(filas, desde: str | None, hasta: str | None, pin: str | None,
                   nombre_pin: str | None = None, truncado: bool = False,
                   generado: datetime | None = None, colegio: str = "",
                   logo: Path | None = None, tipo_logo: str | None = None) -> bytes:
-  """Arma el .xlsx (hojas Detalle, Resumen por día e Info) y lo devuelve como bytes.
+  """Arma el .xlsx (hojas Resumen por día, Detalle e Info) y lo devuelve como bytes.
 
   `filas`: marcaciones en orden ascendente con fecha_hora, pin, nombre, verificacion y sn.
   `colegio`/`logo`/`tipo_logo`: nombre y logo cargados en Configuración (el SVG no se inserta).
@@ -251,7 +259,7 @@ def generar_excel(filas, desde: str | None, hasta: str | None, pin: str | None,
                      "Horas trabajadas", "Observación"], [12, 10, 26, 10, 10, 10, 17, 64],
                 centradas)
   total = timedelta(0)
-  for r in resumen_por_dia(filas):
+  for r in resumen_por_dia(filas, generado):
     total += r.horas
     ws.append([r.fecha.date(), _celda_pin(r.pin), r.nombre, r.entrada.time(),
                r.salida.time() if r.salida else None, r.cantidad, _dias(r.horas), r.observacion])
@@ -262,8 +270,11 @@ def generar_excel(filas, desde: str | None, hasta: str | None, pin: str | None,
     ws.cell(fila, 7).number_format = FORMATO_HORAS
     if r.observacion:
       obs = ws.cell(fila, 8)
-      obs.fill = PatternFill("solid", fgColor=AMBAR_FONDO)
-      obs.font = Font(color=AMBAR_TEXTO)
+      if r.alerta:
+        obs.fill = PatternFill("solid", fgColor=AMBAR_FONDO)
+        obs.font = Font(color=AMBAR_TEXTO)
+      else:
+        obs.font = Font(color=SUAVE, italic=True)
       obs.alignment = Alignment(horizontal="left", vertical="center", indent=1, wrap_text=True)
   ws.auto_filter.ref = f"A{FILA_TITULOS}:H{max(ws.max_row, FILA_TITULOS)}"  # sin la fila Total
   ws.append(["Total", None, None, None, None, None, _dias(total)])
@@ -299,6 +310,12 @@ def generar_excel(filas, desde: str | None, hasta: str | None, pin: str | None,
     ws.append([etiqueta, valor])
     ws.cell(ws.max_row, 1).font = Font(bold=True)
     ws.cell(ws.max_row, 2).alignment = Alignment(horizontal="left")
+
+  # La hoja que se abre es el resumen por día: primera y activa (solo ella seleccionada)
+  wb.move_sheet("Resumen por día", offset=-1)
+  wb.active = 0
+  for hoja in wb.worksheets:
+    hoja.sheet_view.tabSelected = hoja.title == "Resumen por día"
 
   salida = BytesIO()
   wb.save(salida)

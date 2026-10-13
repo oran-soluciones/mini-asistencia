@@ -53,7 +53,7 @@ def test_marcaciones_muestra_filas_nombre_y_verificacion(client, db_path):
   # Más nueva primero
   assert html.index("12/10/2026") < html.index("10/10/2026")
   # El PIN sin empleado se muestra igual, con el nombre vacío
-  assert re.search(r'<td class="num">99</td>\s*<td></td>', html)
+  assert re.search(r'<td class="num c-pin"[^>]*>99</td>\s*<td class="c-nombre"></td>', html)
 
 
 def test_marcaciones_por_defecto_muestra_hoy(client, db_path):
@@ -127,7 +127,7 @@ def test_columna_tipo_usa_la_regla_de_la_jornada(client, db_path):
     marcacion(8, "2026-10-12 09:00:00"),  # una sola: queda como entrada
   ])
   html = client.get("/marcaciones?desde=&hasta=").text
-  por_hora = dict(zip(re.findall(r'<td class="num">(\d\d:\d\d:\d\d)</td>', html), tipos_de(html)))
+  por_hora = dict(zip(re.findall(r'<td class="num c-hora">(\d\d:\d\d:\d\d)</td>', html), tipos_de(html)))
   assert por_hora == {"17:00:00": "Salida", "12:00:00": "Intermedia", "08:01:30": "Repetida",
                       "08:00:00": "Entrada", "09:00:00": "Entrada"}
   assert "tipo-repetida" in html
@@ -165,8 +165,10 @@ def test_empleados_lista_con_cantidad_de_marcaciones(client, db_path):
   html = client.get("/empleados").text
   assert filas_en(html) == 2
   assert "Ana Gómez" in html and "Luis Pérez" in html
-  assert celda(html, "1234567")  # tarjeta de Luis
   assert celda(html, "3") and celda(html, "2")
+  # Tarjeta y grupo siguen en la base y en el comando, pero no se muestran en la planilla
+  assert "1234567" not in html and "<th scope=\"col\">Tarjeta" not in html
+  assert "<th scope=\"col\">Grupo" not in html
   assert "Passwd" not in html and "4821" not in html
 
 
@@ -222,3 +224,43 @@ def test_iclock_sigue_funcionando_desde_la_red(client_externo, db_path):
 def test_ruta_desconocida_la_captura_el_espia_incluso_desde_la_red(client_externo):
   r = client_externo.get("/algo/raro")
   assert (r.status_code, r.text) == (200, "OK")
+
+
+def test_empleados_sin_codigos_de_privilegio_en_la_pantalla(client, db_path):
+  con_datos(db_path)  # Ana: nivel 0; Luis: nivel 14
+  html = client.get("/empleados").text
+  assert "Usuario (0)" not in html and "Administrador (14)" not in html
+  assert "(0)" not in html and "(14)" not in html and "privilegio 14" not in html
+  assert celda(html, "Usuario") and celda(html, "Administrador")
+  assert '<option value="0" selected>Usuario</option>' in html or '<option value="0">Usuario</option>' in html
+  assert '<option value="14">Administrador</option>' in html
+  assert "<label>Nivel" in html and "Privilegio" not in html
+
+
+def test_empleados_ultima_actualizacion_en_formato_argentino(client, db_path):
+  con_datos(db_path)
+  html = client.get("/empleados").text
+  assert re.search(r'<td class="num">\d\d/\d\d/\d{4} \d\d:\d\d</td>', html)
+  assert not re.search(r"\d{4}-\d\d-\d\d \d\d:\d\d:\d\d", html)
+
+
+def test_empleados_sin_avisos_de_cosas_ya_verificadas(client, db_path):
+  html = client.get("/empleados").text
+  for viejo in ("Tildes y ñ", "no verificado cómo las muestra", "deducido"):
+    assert viejo not in html
+  assert "todavía no lo comprobamos" in html  # lo único que falta: el nivel Administrador
+
+
+def test_marcaciones_se_apilan_en_celular_con_nombre_visible(client, db_path):
+  con_datos(db_path)
+  html = client.get("/marcaciones?desde=&hasta=").text
+  for clase in ("c-fecha", "c-hora", "c-tipo", "c-pin", "c-nombre", "c-verif", "c-sn"):
+    assert f"{clase}" in html
+  css = client.get("/static/style.css").text
+  assert ".marcaciones td.c-nombre { grid-area: nombre;" in css
+
+
+def test_dar_de_baja_es_neutro_y_solo_se_pone_rojo_al_apuntarlo(client):
+  css = client.get("/static/style.css").text
+  assert re.search(r"\.btn-peligro \{ color: var\(--texto\); \}", css)
+  assert re.search(r"\.btn-peligro:hover, \.btn-peligro:focus-visible \{[^}]*color: var\(--rojo\)", css)

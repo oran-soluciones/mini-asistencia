@@ -3,17 +3,15 @@
   <div class="tabla-scroll">
   <table class="planilla-tabla">
     <thead>
-      <tr><th scope="col">PIN</th><th scope="col">Nombre</th><th scope="col">Privilegio</th><th scope="col">Tarjeta</th><th scope="col">Grupo</th><th scope="col">Última actualización</th><th scope="col">Marcaciones</th><th scope="col">Último comando</th><th scope="col">Acciones</th></tr>
+      <tr><th scope="col">PIN</th><th scope="col">Nombre</th><th scope="col">Nivel</th><th scope="col">Última actualización</th><th scope="col">Marcaciones</th><th scope="col">Último comando</th><th scope="col">Acciones</th></tr>
     </thead>
     <tbody>
       {% for e in empleados %}
       <tr>
         <td class="num">{{ e.pin }}</td>
         <td class="nombre-celda">{{ e.nombre }}</td>
-        <td>{% if e.privilegio is none %}{% else %}{{ PRIVILEGIOS.get(e.privilegio, "") }} ({{ e.privilegio }}){% endif %}</td>
-        <td class="num">{{ e.tarjeta or "" }}</td>
-        <td class="num">{{ "" if e.grupo is none else e.grupo }}</td>
-        <td class="num">{{ e.actualizado }}</td>
+        <td>{{ "" if e.privilegio is none else PRIVILEGIOS.get(e.privilegio, "") }}</td>
+        <td class="num">{{ fmt_fh(e.actualizado) }}</td>
         <td class="num">{{ e.marcaciones }}</td>
         <td>
           {%- if e.cmd_id %}<span class="estado est-{{ e.cmd_estado }}" title="comando #{{ e.cmd_id }}">{{ e.cmd_tipo }}: {{ etiqueta_estado(e.cmd_estado, e.cmd_codigo) }}</span>
@@ -31,7 +29,7 @@
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="9" class="vacio">Todavía no se recibieron empleados del reloj. Agregá uno con el formulario de arriba o esperá a que el reloj los envíe.</td></tr>
+      <tr><td colspan="7" class="vacio">Todavía no se recibieron empleados del reloj. Agregá uno con el formulario de arriba o esperá a que el reloj los envíe.</td></tr>
       {% endfor %}
     </tbody>
   </table>

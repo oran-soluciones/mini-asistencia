@@ -106,6 +106,16 @@ def fmt_horas(duracion: timedelta | None) -> str:
   return f"{minutos // 60}:{minutos % 60:02d}"
 
 
+def fmt_fecha_hora(texto: str | None) -> str:
+  """'2026-10-13 06:00:00' -> '13/10/2026 06:00' (vacío si no hay dato)."""
+  if not texto:
+    return ""
+  try:
+    return f"{datetime.fromisoformat(texto):%d/%m/%Y %H:%M}"
+  except ValueError:
+    return texto
+
+
 def fecha_larga(dia: datetime) -> str:
   """'Martes 13 de octubre' (sin depender del idioma del sistema)."""
   return f"{DIAS[dia.weekday()].capitalize()} {dia.day} de {MESES[dia.month - 1]}"
@@ -137,11 +147,21 @@ class FilaHoy(NamedTuple):
   ticks: list[float]        # intermedias dentro de la franja, en %
 
 
+class UltimaMarca(NamedTuple):
+  """La marcación válida más reciente de hoy: el renglón vivo "Última marcación"."""
+  pin: str
+  nombre: str | None
+  tipo: str    # Entrada | Salida
+  hora: str    # HH:MM
+  clave: str   # cambia cuando llega una marcación nueva (el cliente la compara para entintar)
+
+
 class VistaHoy(NamedTuple):
   filas: list[FilaHoy]
   conteos: dict[str, int]   # todos, en_colegio, se_retiro, sin_marcar
   ahora_pct: float | None   # None: ahora fuera de la franja
   ahora: datetime
+  ultima: UltimaMarca | None  # None: hoy no marcó nadie
 
 
 def _pct(momento: datetime) -> float:
@@ -217,4 +237,11 @@ def vista_hoy(empleados, marcaciones, ahora: datetime) -> VistaHoy:
   for estado in ESTADOS:
     conteos[estado] = sum(1 for f in filas if f.estado == estado)
   ahora_pct = _pct(ahora)
-  return VistaHoy(filas, conteos, round(ahora_pct, 3) if 0 <= ahora_pct <= 100 else None, ahora)
+  con_marca = [f for f in filas if f.ultima]
+  ultima = None
+  if con_marca:
+    f = max(con_marca, key=lambda f: (f.ultima, f.pin))
+    ultima = UltimaMarca(f.pin, f.nombre, SALIDA if f.estado == SE_RETIRO else ENTRADA,
+                         f.ultima[11:16], f"{f.pin}|{f.ultima}")
+  return VistaHoy(filas, conteos, round(ahora_pct, 3) if 0 <= ahora_pct <= 100 else None, ahora,
+                  ultima)

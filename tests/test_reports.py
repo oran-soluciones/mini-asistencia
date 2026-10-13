@@ -108,7 +108,9 @@ def test_excel_respuesta_y_hojas(client, db_path):
   assert r.headers["content-type"] == XLSX
   assert r.headers["content-disposition"] == 'attachment; filename="asistencia_todo_todo.xlsx"'
   wb = abrir(r)
-  assert wb.sheetnames == ["Detalle", "Resumen por día", "Info"]
+  assert wb.sheetnames == ["Resumen por día", "Detalle", "Info"]  # se abre en el resumen
+  assert wb.active.title == "Resumen por día"
+  assert [bool(h.sheet_view.tabSelected) for h in wb.worksheets] == [True, False, False]
   ws = wb["Detalle"]
   assert titulos(ws) == ["Fecha", "Hora", "Tipo", "PIN", "Nombre", "Verificación", "SN"]
   # Los títulos están en la fila 5 (debajo del encabezado del documento): se congelan y filtran
@@ -126,7 +128,8 @@ def test_excel_respuesta_y_hojas(client, db_path):
   assert [f[5] for f in filas].count(1) == 1  # verificación distinta de 15: el número
 
 
-def test_excel_resumen_horas_y_total(client, db_path):
+def test_excel_resumen_horas_y_total(client, db_path, monkeypatch):
+  monkeypatch.setattr(db, "ahora", lambda: datetime(2026, 10, 20, 9, 0))  # los días ya pasaron
   db.upsert_empleados(SN, parse_users(fixture_text("operlog_usuarios.txt")), db_path)
   cargar(db_path, [
     marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 17:00:00"),
@@ -327,3 +330,41 @@ def test_excel_total_en_negrita_y_tipos_reales():
   assert total[0].font.b and total[6].font.b
   assert total[6].value == timedelta(hours=9) and total[6].number_format == "[h]:mm"
   assert ws["A6"].value == datetime(2026, 10, 12) and ws["D6"].value == time(8)
+
+
+# --- Hoy: "Sin salida todavía" vs "Falta la salida" -------------------------------------------
+
+def test_resumen_del_dia_de_hoy_con_una_marcacion_no_es_un_error():
+  hoy = datetime(2026, 10, 13, 11, 0)
+  res = reports.resumen_por_dia([
+    fila("7", "2026-10-13 08:00:00"),  # hoy: sigue en el colegio
+    fila("8", "2026-10-12 08:00:00"),  # ayer: se olvidó de marcar la salida
+    fila("9", "2026-10-13 08:00:00"), fila("9", "2026-10-13 08:00:30"),  # hoy, con repetida
+  ], hoy)
+  por_pin = {r.pin: r for r in res}
+  assert por_pin["7"].observacion == "Sin salida todavía" and not por_pin["7"].alerta
+  assert por_pin["8"].observacion == "Falta la salida (o la entrada)" and por_pin["8"].alerta
+  assert por_pin["9"].observacion == "1 repetida(s) ignorada(s); Sin salida todavía"
+  assert por_pin["9"].alerta  # la repetida sí es una observación a mirar
+  # sin "ahora" (los usos de siempre) todo día con una sola marcación es un error
+  assert reports.resumen_por_dia([fila("7", "2026-10-13 08:00:00")])[0].alerta
+
+
+def test_excel_a_media_jornada_no_pinta_en_ambar_lo_de_hoy():
+  ws = excel([fila("7", "2026-10-13 08:00:00"), fila("8", "2026-10-12 08:00:00", "Luis")],
+             generado=datetime(2026, 10, 13, 11, 0))["Resumen por día"]
+  ayer, hoy = datos(ws)[0], datos(ws)[1]
+  assert ayer[7] == "Falta la salida (o la entrada)" and hoy[7] == "Sin salida todavía"
+  assert ws["H6"].fill.fgColor.rgb.endswith("FBEFD5")      # el día pasado, en ámbar
+  assert not ws["H7"].fill.fgColor.rgb.endswith("FBEFD5")  # hoy: informativo, sin ámbar
+  assert ws["H7"].font.i
+
+
+def test_excel_endpoint_usa_la_hora_de_la_pc_para_decidir_que_es_hoy(client, db_path, monkeypatch):
+  monkeypatch.setattr(db, "ahora", lambda: datetime(2026, 10, 12, 10, 0))
+  cargar(db_path, [marcacion(7, "2026-10-12 08:00:00")])
+  ws = abrir(client.get("/marcaciones/excel?desde=&hasta="))["Resumen por día"]
+  assert datos(ws)[0][7] == "Sin salida todavía"
+  monkeypatch.setattr(db, "ahora", lambda: datetime(2026, 10, 13, 10, 0))
+  ws = abrir(client.get("/marcaciones/excel?desde=&hasta="))["Resumen por día"]
+  assert datos(ws)[0][7] == "Falta la salida (o la entrada)"

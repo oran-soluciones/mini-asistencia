@@ -10,17 +10,17 @@
       <tbody>
         {% for m in filas %}
         <tr>
-          <td class="num">{{ m.fecha }}</td>
-          <td class="num">{{ m.hora }}</td>
-          <td>{% if m.tipo %}<span class="tipo tipo-{{ m.tipo|lower }}">{{ m.tipo }}</span>{% else %}<span class="suave" title="El día está cortado por el límite de filas">–</span>{% endif %}</td>
-          <td class="num">{{ m.pin }}</td>
-          <td>{{ m.nombre or "" }}</td>
-          <td>
+          <td class="num c-fecha">{{ m.fecha }}</td>
+          <td class="num c-hora">{{ m.hora }}</td>
+          <td class="c-tipo">{% if m.tipo %}<span class="tipo tipo-{{ m.tipo|lower }}">{{ m.tipo }}</span>{% else %}<span class="suave" title="El día está cortado por el límite de filas">–</span>{% endif %}</td>
+          <td class="num c-pin" data-label="PIN">{{ m.pin }}</td>
+          <td class="c-nombre">{{ m.nombre or "" }}</td>
+          <td class="c-verif" data-label="Verificación">
             {%- if m.verificacion == 15 %}<span title="15 = cara (deducido, no verificado)">Cara</span>
             {%- elif m.verificacion is none %}–
             {%- else %}{{ m.verificacion }}{% endif -%}
           </td>
-          <td class="num">{{ m.sn }}</td>
+          <td class="num c-sn" data-label="Reloj">{{ m.sn }}</td>
         </tr>
         {% else %}
         <tr><td colspan="7" class="vacio">No hay marcaciones para este filtro. Probá con otro rango de fechas o tocá "Ver todo".</td></tr>

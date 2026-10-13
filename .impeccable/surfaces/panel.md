@@ -50,7 +50,8 @@ tinta azul que se desvanece en 1.2 s (ease-out exponencial), solo en esa celda. 
 `prefers-reduced-motion` (sin pulso ni entintado animado, solo el estado final).
 
 FORM: Own-world escolar (pizarrón + tinta de birome), posición 1 de la lista propia. seed: none
-(unavailable)
+(unavailable) — el roll de `concept-seed` NO se ejecutó: el lanzador de la skill (binario de
+terceros) no fue aprobado en este proyecto; la dirección se eligió sin roll.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 

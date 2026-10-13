@@ -189,3 +189,29 @@ def test_la_linea_ahora_no_se_dibuja_antes_de_las_7():
   assert vista_hoy([], [], datetime(2026, 10, 13, 6, 59)).ahora_pct is None
   assert vista_hoy([], [], datetime(2026, 10, 13, 7, 0)).ahora_pct == 0.0
   assert vista_hoy([], [], datetime(2026, 10, 13, 19, 0)).ahora_pct == 100.0
+
+
+# --- Última marcación (el renglón vivo de Hoy) ---------------------------------------------
+
+def test_ultima_marcacion_es_la_valida_mas_reciente_de_todos():
+  empleados = [emp("1", "Zoe"), emp("3", "Beto")]
+  marcas = [marca("1", "08:00:00"), marca("1", "09:30:00"),   # Zoe se retiró 09:30
+            marca("3", "07:30:00"), marca("3", "09:10:00")]   # Beto se retiró 09:10
+  u = vista_hoy(empleados, marcas, AHORA).ultima
+  assert (u.pin, u.nombre, u.tipo, u.hora) == ("1", "Zoe", "Salida", "09:30")
+  assert u.clave == "1|2026-10-13 09:30:00"
+  # llega alguien nuevo (entrada): pasa a ser la última y la clave cambia
+  nueva = vista_hoy(empleados, marcas + [marca("2", "10:05:07")], AHORA).ultima
+  assert (nueva.pin, nueva.nombre, nueva.tipo, nueva.hora) == ("2", None, "Entrada", "10:05")
+  assert nueva.clave != u.clave
+
+
+def test_ultima_marcacion_ignora_repetidas_y_dias_anteriores():
+  marcas = [marca("3", "07:30:00"), marca("3", "07:31:00"),
+            marca("3", "23:00:00", dia="2026-10-12")]
+  u = vista_hoy([emp("3", "Beto")], marcas, AHORA).ultima
+  assert (u.tipo, u.hora) == ("Entrada", "07:30")
+
+
+def test_sin_marcaciones_no_hay_ultima():
+  assert vista_hoy([emp("3", "Beto")], [], AHORA).ultima is None

@@ -12,10 +12,10 @@
   <div class="campos">
     <label>PIN <input type="text" value="{{ emp.pin }}" size="9" disabled></label>
     <label>Nombre <input type="text" name="nombre" value="{{ form.nombre }}" maxlength="24" size="26" required></label>
-    <label>Privilegio
+    <label>Nivel
       <select name="privilegio">
-        <option value="0"{% if form.privilegio == "0" %} selected{% endif %}>Usuario (0)</option>
-        <option value="14"{% if form.privilegio == "14" %} selected{% endif %}>Administrador (14)</option>
+        <option value="0"{% if form.privilegio == "0" %} selected{% endif %}>Usuario</option>
+        <option value="14"{% if form.privilegio == "14" %} selected{% endif %}>Administrador</option>
       </select>
     </label>
     <div class="acciones">
@@ -24,6 +24,6 @@
     </div>
   </div>
 </form>
-<p class="alerta alerta-aviso">{{ ico("info") }}<span>No verificado: si modificar conserva la cara registrada. Probar primero con un empleado de prueba.</span></p>
-<p class="ayuda">El PIN no se puede cambiar. Tildes y ñ: no verificado cómo las muestra el reloj. Se envían los datos de tarjeta y grupo que se conocen; la contraseña no se guarda ni se envía (no verificado qué hace el reloj con ese campo vacío).</p>
+<p class="alerta alerta-aviso">{{ ico("info") }}<span>Al guardar, el reloj recibe también la tarjeta que conocemos y la contraseña vacía. Si el empleado ya tenía una tarjeta o una contraseña cargadas en el reloj, podrían borrarse; todavía no lo comprobamos.</span></p>
+<p class="ayuda">El PIN no se puede cambiar. Administrador es el nivel que creemos que el reloj reserva para sus administradores; todavía no lo comprobamos.</p>
 {% endblock %}

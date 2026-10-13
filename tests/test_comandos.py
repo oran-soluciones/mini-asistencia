@@ -1,6 +1,8 @@
 from contextlib import closing
 from datetime import datetime, timedelta
 
+import re
+
 import pytest
 
 from app import db, panel
@@ -303,16 +305,17 @@ def test_error_de_alta_conserva_lo_escrito_y_escapa(client):
   assert 'value="007"' in r.text and "&lt;b&gt;Ana&lt;/b&gt;" in r.text and "<b>Ana</b>" not in r.text
 
 
-def test_formulario_muestra_la_nota_de_tildes(client):
+def test_formulario_ya_no_avisa_de_tildes_no_verificadas(client):
   html = client.get("/empleados").text
-  assert "Tildes y ñ: no verificado cómo las muestra el reloj" in html
+  assert "no verificado cómo las muestra" not in html
 
 
 def test_modificacion_actualiza_local_y_encola_con_tarjeta_y_grupo(client, db_path):
   con_reloj(client)
   db.upsert_empleados(SN, parse_users("USER PIN=7\tName=Ana\tPri=0\tPasswd=4821\tCard=555\tGrp=3\n"), db_path)
   html = client.get("/empleados/7/editar").text
-  assert "No verificado: si modificar conserva la cara registrada" in html
+  assert "conserva la cara registrada" not in html and "no verificado" not in html.lower()
+  assert "podrían borrarse; todavía no lo comprobamos" in html
   r = client.post("/empleados/7/editar", data={"nombre": "Ana Díaz", "privilegio": "0"},
                   follow_redirects=False)
   assert r.status_code == 303
@@ -504,6 +507,26 @@ def test_indicador_del_reloj_esta_en_todas_las_vistas_y_se_refresca(client, db_p
     assert 'hx-get="/reloj"' in html and "Reloj conectado" in html and "hace 3 s" in html, url
   parcial = client.get("/reloj").text
   assert "<html" not in parcial and 'id="reloj"' in parcial and "hace 3 s" in parcial
+
+
+def test_ultimos_comandos_con_rotulos_humanos(client, db_path, hora):
+  con_reloj(client)
+  alta(client, "97", "Pendiente")
+  client.get(GETREQUEST)
+  confirmar(client, 1)
+  alta(client, "96", "Falla")
+  client.get(GETREQUEST)
+  confirmar(client, 2, 3)
+  client.post("/empleados/97/editar", data={"nombre": "Otro", "privilegio": "0"})
+  html = client.get("/empleados").text
+  tabla = html[html.index('class="planilla-tabla comandos"'):]
+  for rotulo in ("N.º", "Operación", "Estado", "Intentos"):
+    assert f'<th scope="col">{rotulo}</th>' in tabla
+  assert "Entregas" not in tabla and "<th scope=\"col\">Tipo</th>" not in tabla
+  assert "<td>Alta</td>" in tabla and "<td>Modificación</td>" in tabla
+  assert ">Confirmado</span>" in tabla and ">Pendiente</span>" in tabla
+  assert ">Error (código 3)</span>" in tabla
+  assert not re.search(r"\d{4}-\d\d-\d\d \d\d:\d\d", tabla)  # fechas dd/mm/aaaa
 
 
 def test_baja_pide_confirmacion(client, db_path):

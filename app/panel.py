@@ -26,6 +26,7 @@ RELOJ_CONECTADO_SEGUNDOS = 30  # último contacto más reciente que esto = reloj
 ADMIN = 14  # privilegio de administrador (deducido del único usuario real, no verificado)
 PRIVILEGIOS = {0: "Usuario", ADMIN: "Administrador"}
 NOMBRE_MAX = 24
+OPERACIONES = {"alta": "Alta", "modificacion": "Modificación", "baja": "Baja"}
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 _LOCALES = {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
 _PIN_RE = re.compile(r"[1-9][0-9]{0,8}")
@@ -74,7 +75,8 @@ templates = Jinja2Templates(directory=BASE_DIR / "templates")  # autoescape acti
 templates.env.globals.update(
   etiqueta_estado=etiqueta_estado, PRIVILEGIOS=PRIVILEGIOS, ADMIN=ADMIN,
   estado_reloj=estado_reloj, datos_colegio=datos_colegio, ESTADOS=jornada.ESTADOS,
-  fmt_hm=jornada.fmt_hm, fmt_horas=jornada.fmt_horas, MARCAS_HORA=jornada.MARCAS_HORA,
+  fmt_hm=jornada.fmt_hm, fmt_horas=jornada.fmt_horas, fmt_fh=jornada.fmt_fecha_hora,
+  OPERACIONES=OPERACIONES, MARCAS_HORA=jornada.MARCAS_HORA,
   INICIO_HORA=jornada.INICIO_MIN // 60, ESCALA_HORAS=jornada.ESCALA_MIN // 60,
 )
 
@@ -248,7 +250,8 @@ def marcaciones_excel(request: Request):
   emp = db.obtener_empleado(pin) if pin else None
   contenido = reports.generar_excel(
     reversed(filas), desde, hasta, pin, emp["nombre"] if emp else None, truncado,
-    colegio=colegio.leer()["nombre"], logo=colegio.ruta_logo(), tipo_logo=colegio.tipo_logo())
+    generado=db.ahora(), colegio=colegio.leer()["nombre"], logo=colegio.ruta_logo(),
+    tipo_logo=colegio.tipo_logo())
   nombre = f"asistencia_{desde or 'todo'}_{hasta or 'todo'}.xlsx"
   return Response(contenido, media_type=XLSX,
                   headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
@@ -342,7 +345,7 @@ def empleado_alta(request: Request, pin: str = Form(""), nombre: str = Form(""),
   pri = _privilegio(privilegio)
   error = error_pin(pin) or error_nombre(nombre)
   if not error and pri is None:
-    error = "El privilegio tiene que ser Usuario o Administrador."
+    error = "El nivel tiene que ser Usuario o Administrador."
   if error:
     return _pagina_empleados(request, error, 400, form)
   if db.obtener_empleado(pin):
@@ -380,7 +383,7 @@ def empleado_modificar(request: Request, pin: str, nombre: str = Form(""),
   pri = _privilegio(privilegio)
   error = error_nombre(nombre)
   if not error and pri is None:
-    error = "El privilegio tiene que ser Usuario o Administrador."
+    error = "El nivel tiene que ser Usuario o Administrador."
   if error:
     return _pagina_editar(request, emp, error, 400, form)
   texto = comando_usuario(pin, nombre, pri, emp["tarjeta"] or "",

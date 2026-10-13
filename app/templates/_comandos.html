@@ -2,19 +2,19 @@
   <div class="tabla-scroll">
     <table class="planilla-tabla comandos">
       <thead>
-        <tr class="encabezado"><th scope="col">Id</th><th scope="col">Tipo</th><th scope="col">PIN</th><th scope="col">Estado</th><th scope="col">Entregas</th><th scope="col">Creado</th><th scope="col">Enviado</th><th scope="col">Confirmado</th></tr>
+        <tr class="encabezado"><th scope="col">N.º</th><th scope="col">Operación</th><th scope="col">PIN</th><th scope="col">Estado</th><th scope="col">Intentos</th><th scope="col">Creado</th><th scope="col">Enviado</th><th scope="col">Confirmado</th></tr>
       </thead>
       <tbody>
         {% for c in comandos %}
         <tr class="fila-{{ c.estado }}">
           <td>{{ c.id }}</td>
-          <td>{{ c.tipo }}</td>
+          <td>{{ OPERACIONES.get(c.tipo, c.tipo) }}</td>
           <td>{{ c.pin }}</td>
-          <td><span class="estado est-{{ c.estado }}">{{ etiqueta_estado(c.estado, c.codigo_retorno) }}</span></td>
+          <td><span class="estado est-{{ c.estado }}">{{ etiqueta_estado(c.estado, c.codigo_retorno)|capitalize }}</span></td>
           <td>{{ c.intentos }}</td>
-          <td>{{ c.creado }}</td>
-          <td>{{ c.enviado or "" }}</td>
-          <td>{{ c.confirmado or "" }}</td>
+          <td class="num">{{ fmt_fh(c.creado) }}</td>
+          <td class="num">{{ fmt_fh(c.enviado) }}</td>
+          <td class="num">{{ fmt_fh(c.confirmado) }}</td>
         </tr>
         {% else %}
         <tr class="fila-vacia"><td colspan="8" class="vacio">Todavía no se envió ningún comando. Cuando agregues, modifiques o des de baja a alguien, el comando aparece acá con su estado.</td></tr>

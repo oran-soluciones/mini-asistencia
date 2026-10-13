@@ -13,15 +13,15 @@
   <div class="campos">
     <label>PIN <input type="text" name="pin" value="{{ form.pin }}" inputmode="numeric" maxlength="9" size="9" required></label>
     <label>Nombre <input type="text" name="nombre" value="{{ form.nombre }}" maxlength="24" size="26" required></label>
-    <label>Privilegio
+    <label>Nivel
       <select name="privilegio">
-        <option value="0"{% if form.privilegio == "0" %} selected{% endif %}>Usuario (0)</option>
-        <option value="14"{% if form.privilegio == "14" %} selected{% endif %}>Administrador (14)</option>
+        <option value="0"{% if form.privilegio == "0" %} selected{% endif %}>Usuario</option>
+        <option value="14"{% if form.privilegio == "14" %} selected{% endif %}>Administrador</option>
       </select>
     </label>
     <button type="submit" class="btn btn-primario">{{ ico("mas") }}<span>Agregar empleado</span></button>
   </div>
-  <p class="ayuda">PIN: número de 1 a 9 dígitos, sin ceros a la izquierda. Nombre: hasta 24 caracteres. Tildes y ñ: no verificado cómo las muestra el reloj. El privilegio 14 = administrador es deducido, no verificado. La cara se registra en el propio reloj.</p>
+  <p class="ayuda">PIN: número de 1 a 9 dígitos, sin ceros a la izquierda. Nombre: hasta 24 caracteres. La cara se registra en el propio reloj. Administrador es el nivel que creemos que el reloj reserva para sus administradores; todavía no lo comprobamos.</p>
 </form>
 {% include "_tabla_empleados.html" %}
 <details class="comandos-det">
