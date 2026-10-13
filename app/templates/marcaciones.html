@@ -1,8 +1,11 @@
 {% extends "base.html" %}
+{% from "_iconos.html" import ico %}
 {% block titulo %}Marcaciones{% endblock %}
 {% block contenido %}
-<h2>Marcaciones</h2>
-<form method="get" action="/marcaciones" class="filtros">
+<div class="titulo-fila">
+  <h1>Marcaciones</h1>
+</div>
+<form method="get" action="/marcaciones" class="barra-filtro filtros">
   <label>Desde <input type="date" name="desde" value="{{ desde }}"></label>
   <label>Hasta <input type="date" name="hasta" value="{{ hasta }}"></label>
   <label>Empleado
@@ -13,9 +16,11 @@
       {% endfor %}
     </select>
   </label>
-  <button type="submit">Filtrar</button>
-  <a href="/marcaciones?desde=&amp;hasta=" class="boton">Ver todo</a>
-  <button type="submit" formaction="/marcaciones/excel" class="secundario">Exportar a Excel</button>
+  <div class="acciones">
+    <button type="submit" class="btn">Filtrar</button>
+    <a href="/marcaciones?desde=&amp;hasta=" class="btn btn-ghost">Ver todo</a>
+  </div>
+  <button type="submit" formaction="/marcaciones/excel" class="btn btn-primario derecha" data-descarga>{{ ico("excel") }}<span>Exportar a Excel</span></button>
 </form>
 {% include "_tabla_marcaciones.html" %}
 {% endblock %}

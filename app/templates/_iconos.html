@@ -1,0 +1,4 @@
+{#- Íconos propios del sprite /static/iconos.svg (trazo 1.5). Uso: {{ ico("hoy") }} -#}
+{% macro ico(nombre, clase="") -%}
+<svg class="ico{% if clase %} {{ clase }}{% endif %}" aria-hidden="true" focusable="false"><use href="/static/iconos.svg#i-{{ nombre }}"/></svg>
+{%- endmacro %}

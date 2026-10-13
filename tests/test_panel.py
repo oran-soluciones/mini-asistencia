@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from app import db, panel
@@ -30,31 +31,36 @@ def filas_en(html):
   return html.count("<tr>") - 1  # menos el encabezado
 
 
-def test_raiz_redirige_a_marcaciones(client):
+def celda(html, texto):
+  """True si hay una <td> (con o sin atributos) con exactamente ese texto."""
+  return re.search(rf"<td(?:\s[^>]*)?>\s*{re.escape(texto)}\s*</td>", html) is not None
+
+
+def test_raiz_redirige_a_hoy(client):
   r = client.get("/", follow_redirects=False)
   assert r.status_code in (302, 307)
-  assert r.headers["location"] == "/marcaciones"
+  assert r.headers["location"] == "/hoy"
 
 
 def test_marcaciones_muestra_filas_nombre_y_verificacion(client, db_path):
   con_datos(db_path)
   html = client.get("/marcaciones?desde=&hasta=").text
   assert "mini-asistencia" in html
-  assert "2026-10-11 08:01:00" in html and "Ana Gómez" in html
+  assert celda(html, "11/10/2026") and celda(html, "08:01:00") and celda(html, "Ana Gómez")
   assert filas_en(html) == 5
   assert "Cara" in html and "no verificado" in html  # verificación 15
-  assert "<td>1</td>" in html  # verificación 1 se muestra como número
+  assert celda(html, "1")  # verificación 1 se muestra como número
   # Más nueva primero
-  assert html.index("2026-10-12 11:00:00") < html.index("2026-10-10 08:00:00")
+  assert html.index("12/10/2026") < html.index("10/10/2026")
   # El PIN sin empleado se muestra igual, con el nombre vacío
-  assert "<td>99</td>\n        <td></td>" in html
+  assert re.search(r'<td class="num">99</td>\s*<td></td>', html)
 
 
 def test_marcaciones_por_defecto_muestra_hoy(client, db_path):
   hoy = date.today().isoformat()
   cargar(db_path, [marcacion(7, f"{hoy} 07:30:00"), marcacion(7, "2026-01-01 07:30:00")])
   html = client.get("/marcaciones").text
-  assert f"{hoy} 07:30:00" in html and "2026-01-01 07:30:00" not in html
+  assert celda(html, date.today().strftime("%d/%m/%Y")) and "01/01/2026" not in html
   assert f'value="{hoy}"' in html
 
 
@@ -62,7 +68,7 @@ def test_filtro_desde_hasta_inclusivo(client, db_path):
   con_datos(db_path)
   html = client.get("/marcaciones?desde=2026-10-11&hasta=2026-10-11").text
   assert filas_en(html) == 2
-  assert "2026-10-11 08:01:00" in html and "2026-10-11 09:00:00" in html
+  assert celda(html, "08:01:00") and celda(html, "09:00:00")
   assert filas_en(client.get("/marcaciones?desde=2026-10-12&hasta=").text) == 2
   assert filas_en(client.get("/marcaciones?desde=&hasta=2026-10-10").text) == 1
 
@@ -71,7 +77,7 @@ def test_filtro_por_pin(client, db_path):
   con_datos(db_path)
   html = client.get("/marcaciones?desde=&hasta=&pin=8").text
   assert filas_en(html) == 2 and "Luis Pérez" in html
-  assert "<td>Ana Gómez</td>" not in html
+  assert not celda(html, "Ana Gómez")
   html = client.get("/marcaciones?desde=2026-10-11&hasta=2026-10-11&pin=8").text
   assert filas_en(html) == 1
 
@@ -97,7 +103,7 @@ def test_parcial_de_la_tabla_conserva_filtros(client, db_path):
   assert 'hx-get="/marcaciones/tabla?desde=2026-10-11&amp;hasta=2026-10-11&amp;pin=8"' in html
   parcial = client.get("/marcaciones/tabla?desde=2026-10-11&hasta=2026-10-11&pin=8").text
   assert "<html" not in parcial and 'id="tabla-marcaciones"' in parcial
-  assert filas_en(parcial) == 1 and "2026-10-11 09:00:00" in parcial
+  assert filas_en(parcial) == 1 and celda(parcial, "09:00:00")
 
 
 def test_aviso_si_se_corta_el_limite(client, db_path, monkeypatch):
@@ -106,6 +112,42 @@ def test_aviso_si_se_corta_el_limite(client, db_path, monkeypatch):
   html = client.get("/marcaciones?desde=&hasta=").text
   assert filas_en(html) == 3 and "más nuevas" in html
   assert "más nuevas" not in client.get("/marcaciones?desde=&hasta=&pin=7").text
+
+
+def tipos_de(html):
+  """Tipos de la columna Tipo, en el orden en que salen en la tabla."""
+  return re.findall(r'<span class="tipo tipo-[a-z]+">([A-Za-z]+)</span>', html)
+
+
+def test_columna_tipo_usa_la_regla_de_la_jornada(client, db_path):
+  # Más nueva primero: 17:00 salida, 12:00 intermedia, 08:01 repetida, 08:00 entrada
+  cargar(db_path, [
+    marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 08:01:30"),
+    marcacion(7, "2026-10-12 12:00:00"), marcacion(7, "2026-10-12 17:00:00"),
+    marcacion(8, "2026-10-12 09:00:00"),  # una sola: queda como entrada
+  ])
+  html = client.get("/marcaciones?desde=&hasta=").text
+  por_hora = dict(zip(re.findall(r'<td class="num">(\d\d:\d\d:\d\d)</td>', html), tipos_de(html)))
+  assert por_hora == {"17:00:00": "Salida", "12:00:00": "Intermedia", "08:01:30": "Repetida",
+                      "08:00:00": "Entrada", "09:00:00": "Entrada"}
+  assert "tipo-repetida" in html
+
+
+def test_columna_tipo_cada_dia_por_separado(client, db_path):
+  cargar(db_path, [marcacion(7, "2026-10-11 08:00:00"), marcacion(7, "2026-10-12 08:00:00")])
+  html = client.get("/marcaciones?desde=&hasta=").text
+  assert tipos_de(html) == ["Entrada", "Entrada"]
+
+
+def test_columna_tipo_se_omite_en_el_dia_cortado_por_el_limite(client, db_path, monkeypatch):
+  monkeypatch.setattr(panel, "LIMITE_FILAS", 3)
+  cargar(db_path, [
+    marcacion(7, "2026-10-11 08:00:00"), marcacion(7, "2026-10-11 17:00:00"),
+    marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 17:00:00"),
+  ])
+  html = client.get("/marcaciones?desde=&hasta=").text
+  # El 11 quedó con una sola fila visible: su Tipo sería engañoso, no se muestra
+  assert tipos_de(html) == ["Salida", "Entrada"]
 
 
 def test_se_escapa_el_html(client, db_path):
@@ -123,8 +165,8 @@ def test_empleados_lista_con_cantidad_de_marcaciones(client, db_path):
   html = client.get("/empleados").text
   assert filas_en(html) == 2
   assert "Ana Gómez" in html and "Luis Pérez" in html
-  assert "<td>1234567</td>" in html  # tarjeta de Luis
-  assert "<td>3</td>" in html and "<td>2</td>" in html
+  assert celda(html, "1234567")  # tarjeta de Luis
+  assert celda(html, "3") and celda(html, "2")
   assert "Passwd" not in html and "4821" not in html
 
 
@@ -132,16 +174,36 @@ def test_empleados_vacio(client, db_path):
   assert "Todavía no se recibieron empleados" in client.get("/empleados").text
 
 
+def test_empleados_alta_en_linea_y_comandos_plegables(client, db_path):
+  html = client.get("/empleados").text
+  assert '<form method="post" action="/empleados" class="alta">' in html
+  assert html.index('class="alta"') < html.index('id="tabla-empleados"')  # arriba de la planilla
+  assert '<details class="comandos-det">' in html and "Últimos comandos" in html
+  assert "<dialog" not in html
+
+
 def test_static_local(client):
   r = client.get("/static/htmx.min.js")
   assert r.status_code == 200 and "htmx" in r.text
   assert client.get("/static/style.css").status_code == 200
+  assert client.get("/static/panel.js").status_code == 200
+  assert client.get("/static/iconos.svg").status_code == 200
   assert client.get("/static/no_existe.js").status_code == 404
 
 
+def test_sin_recursos_externos(client):
+  """Sin CDN ni fuentes web: todo lo que carga el panel sale de /static."""
+  for url in ("/hoy", "/marcaciones", "/empleados", "/configuracion"):
+    html = client.get(url).text
+    assert not re.search(r'(?:src|href)="https?://', html), url
+  css = client.get("/static/style.css").text
+  assert "@import" not in css and "http://" not in css.replace("http://www.w3.org", "")
+
+
 def test_panel_rechaza_clientes_no_locales(client_externo, db_path):
-  for url in ("/", "/marcaciones", "/marcaciones/tabla", "/empleados",
-              "/static/htmx.min.js", "/static/style.css"):
+  for url in ("/", "/hoy", "/hoy/tabla", "/reloj", "/marcaciones", "/marcaciones/tabla",
+              "/empleados", "/configuracion", "/colegio/logo",
+              "/static/htmx.min.js", "/static/style.css", "/static/panel.js"):
     assert client_externo.get(url, follow_redirects=False).status_code == 403, url
   assert not db_path.exists()
 

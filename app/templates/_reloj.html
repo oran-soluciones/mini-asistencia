@@ -1,8 +1,11 @@
-<div id="reloj" class="reloj {{ 'conectado' if conectado else ('sin-contacto' if reloj else 'nunca') }}"{% if oob %} hx-swap-oob="true"{% endif %}>
-  {% if reloj %}
-  Reloj <strong>{{ reloj.sn }}</strong>: último contacto hace {{ hace }}
-  ({{ "conectado" if conectado else "sin contacto reciente" }})
+{% set r = estado_reloj() %}
+<div id="reloj" class="reloj {{ 'conectado' if r.conectado else ('sin-contacto' if r.reloj else 'nunca') }}" hx-get="/reloj" hx-trigger="every 5s" hx-swap="outerHTML" role="status"{% if r.reloj %} title="Reloj {{ r.reloj.sn }}"{% endif %}>
+  <span class="punto" aria-hidden="true"></span>
+  {% if r.reloj %}
+  <span class="reloj-texto">{{ "Reloj conectado" if r.conectado else "Reloj sin contacto" }}</span>
+  <span class="reloj-sep" aria-hidden="true">·</span>
+  <span class="reloj-hace">hace {{ r.hace }}</span>
   {% else %}
-  Todavía no se conectó ningún reloj.
+  <span class="reloj-texto">Todavía no se conectó ningún reloj</span>
   {% endif %}
 </div>

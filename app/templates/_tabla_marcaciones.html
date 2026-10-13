@@ -1,28 +1,32 @@
 <div id="tabla-marcaciones" hx-get="{{ refresco }}" hx-trigger="every 5s" hx-swap="outerHTML">
   {% if truncado %}
-  <p class="aviso">Se muestran solo las {{ limite }} marcaciones más nuevas; hay más. Acotá el rango de fechas o elegí un empleado.</p>
+  <p class="alerta alerta-aviso"><span>Se muestran solo las {{ limite }} marcaciones más nuevas; hay más. Acotá el rango de fechas o elegí un empleado.</span></p>
   {% endif %}
-  <table>
-    <thead>
-      <tr><th>Fecha y hora</th><th>PIN</th><th>Nombre</th><th>Verificación</th><th>Reloj (SN)</th></tr>
-    </thead>
-    <tbody>
-      {% for m in filas %}
-      <tr>
-        <td>{{ m.fecha_hora }}</td>
-        <td>{{ m.pin }}</td>
-        <td>{{ m.nombre or "" }}</td>
-        <td>
-          {%- if m.verificacion == 15 %}<span title="15 = cara (deducido, no verificado)">Cara</span>
-          {%- elif m.verificacion is none %}-
-          {%- else %}{{ m.verificacion }}{% endif -%}
-        </td>
-        <td>{{ m.sn }}</td>
-      </tr>
-      {% else %}
-      <tr><td colspan="5" class="vacio">No hay marcaciones para este filtro.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <p class="pie">{{ filas|length }} marcaciones. Actualizado {{ ahora }} (se refresca cada 5 s).</p>
+  <div class="tabla-scroll">
+    <table class="planilla-tabla marcaciones">
+      <thead>
+        <tr><th scope="col">Fecha</th><th scope="col">Hora</th><th scope="col">Tipo</th><th scope="col">PIN</th><th scope="col">Nombre</th><th scope="col">Verificación</th><th scope="col">Reloj (SN)</th></tr>
+      </thead>
+      <tbody>
+        {% for m in filas %}
+        <tr>
+          <td class="num">{{ m.fecha }}</td>
+          <td class="num">{{ m.hora }}</td>
+          <td>{% if m.tipo %}<span class="tipo tipo-{{ m.tipo|lower }}">{{ m.tipo }}</span>{% else %}<span class="suave" title="El día está cortado por el límite de filas">–</span>{% endif %}</td>
+          <td class="num">{{ m.pin }}</td>
+          <td>{{ m.nombre or "" }}</td>
+          <td>
+            {%- if m.verificacion == 15 %}<span title="15 = cara (deducido, no verificado)">Cara</span>
+            {%- elif m.verificacion is none %}–
+            {%- else %}{{ m.verificacion }}{% endif -%}
+          </td>
+          <td class="num">{{ m.sn }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="vacio">No hay marcaciones para este filtro. Probá con otro rango de fechas o tocá "Ver todo".</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="pie">{{ filas|length }} marcaciones. Actualizado {{ ahora }} (se refresca cada 5 s). <span class="htmx-indicator">Actualizando…</span></p>
 </div>

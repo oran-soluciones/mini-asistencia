@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from app import db, iclock, panel  # noqa: E402
+from app import config, db, iclock, panel  # noqa: E402
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 
@@ -18,10 +18,13 @@ def fixture_text(name: str) -> str:
 
 @pytest.fixture
 def db_path(tmp_path, monkeypatch):
-  """Base y samples temporales: los tests nunca tocan los datos reales."""
+  """Base, samples y carpeta de datos temporales: los tests nunca tocan los datos reales."""
   path = tmp_path / "test.db"
   monkeypatch.setattr(db, "DB_PATH", path)
   monkeypatch.setattr(iclock, "SAMPLES_DIR", tmp_path)
+  datos = tmp_path / "datos"  # nombre y logo del colegio (colegio.json, logo.*)
+  datos.mkdir()
+  monkeypatch.setattr(config, "DATA_DIR", datos)
   return path
 
 

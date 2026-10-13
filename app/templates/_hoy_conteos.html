@@ -1,0 +1,6 @@
+<div id="hoy-conteos" class="segmentos" role="group" aria-label="Filtrar por estado"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <button type="button" class="segmento" data-estado="">Todos <span class="n">{{ vista.conteos.todos }}</span></button>
+  <button type="button" class="segmento seg-en_colegio" data-estado="en_colegio"><span class="punto" aria-hidden="true"></span>En el colegio <span class="n">{{ vista.conteos.en_colegio }}</span></button>
+  <button type="button" class="segmento seg-se_retiro" data-estado="se_retiro"><span class="punto" aria-hidden="true"></span>Se retiraron <span class="n">{{ vista.conteos.se_retiro }}</span></button>
+  <button type="button" class="segmento seg-sin_marcar" data-estado="sin_marcar"><span class="punto" aria-hidden="true"></span>Sin marcar <span class="n">{{ vista.conteos.sin_marcar }}</span></button>
+</div>

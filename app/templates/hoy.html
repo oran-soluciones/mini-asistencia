@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "_iconos.html" import ico %}
+{% block titulo %}Hoy{% endblock %}
+{% block contenido %}
+<section id="hoy" class="hoy" data-filtro="{{ estado }}">
+  {% include "_hoy_titulo.html" %}
+  <div class="barra-filtro">
+    {% include "_hoy_conteos.html" %}
+    <div class="buscador">
+      <label class="sr-only" for="buscar">Buscar por nombre o PIN</label>
+      {{ ico("buscar") }}
+      <input id="buscar" type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre o PIN" autocomplete="off" maxlength="80">
+      <button type="button" class="limpiar" aria-label="Borrar la búsqueda" hidden>{{ ico("x") }}</button>
+    </div>
+  </div>
+  {% include "_hoy_planilla.html" %}
+</section>
+{% endblock %}

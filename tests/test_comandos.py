@@ -342,7 +342,7 @@ def test_baja_encola_y_borra_la_fila_recien_al_confirmar(client, db_path):
   assert (c["tipo"], c["texto"], c["estado"]) == ("baja", "DATA DELETE USERINFO PIN=99", "pendiente")
   # Mientras tanto: sigue en la lista, como baja pendiente y sin botones
   html = client.get("/empleados").text
-  assert "Baja pendiente" in html and "Dar de baja</button>" not in html
+  assert "Baja pendiente" in html and 'action="/empleados/99/baja"' not in html
   assert client.post("/empleados/99/baja").status_code == 409
   assert client.get("/empleados/99/editar").status_code == 409
   # El reloj recibe el comando y confirma
@@ -363,7 +363,7 @@ def test_baja_con_error_del_reloj_no_borra_la_fila(client, db_path):
   confirmar(client, 2, -1)
   assert [e["pin"] for e in empleados(db_path)] == ["99"]
   html = client.get("/empleados").text
-  assert "error (código -1)" in html and "Dar de baja</button>" in html  # se puede reintentar
+  assert "error (código -1)" in html and 'action="/empleados/99/baja"' in html  # se puede reintentar
 
 
 def test_baja_o_edicion_de_empleado_inexistente(client):
@@ -491,9 +491,19 @@ def test_parcial_de_estado_se_refresca_con_htmx(client, db_path):
   assert "hx-swap-oob" not in html  # en la página completa no hace falta
   parcial = client.get("/empleados/estado").text
   assert "<html" not in parcial and 'id="tabla-empleados"' in parcial
-  assert 'id="reloj"' in parcial and 'id="comandos"' in parcial
-  assert parcial.count('hx-swap-oob="true"') == 2
+  assert 'id="comandos"' in parcial and parcial.count('hx-swap-oob="true"') == 1
+  assert 'id="reloj"' not in parcial  # el indicador del reloj se refresca solo, en la barra
   assert "alta: pendiente" in parcial
+
+
+def test_indicador_del_reloj_esta_en_todas_las_vistas_y_se_refresca(client, db_path, hora):
+  con_reloj(client)
+  hora.avanzar(3)
+  for url in ("/hoy", "/marcaciones", "/empleados", "/configuracion"):
+    html = client.get(url).text
+    assert 'hx-get="/reloj"' in html and "Reloj conectado" in html and "hace 3 s" in html, url
+  parcial = client.get("/reloj").text
+  assert "<html" not in parcial and 'id="reloj"' in parcial and "hace 3 s" in parcial
 
 
 def test_baja_pide_confirmacion(client, db_path):

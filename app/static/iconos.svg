@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <!-- Íconos propios: 24x24, trazo 1.5, puntas y uniones redondas. Uso: <use href="/static/iconos.svg#i-nombre"/> -->
+  <symbol id="i-hoy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="5" width="16" height="15" rx="2"/>
+    <path d="M4 10h16M8 3v4M16 3v4"/>
+    <rect x="8" y="13.5" width="3" height="3" rx=".5"/>
+  </symbol>
+  <symbol id="i-marcaciones" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/>
+  </symbol>
+  <symbol id="i-empleados" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="9" cy="8" r="3.5"/>
+    <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/>
+    <circle cx="17" cy="9" r="2.5"/>
+    <path d="M17 14c2.6 0 4.5 1.8 4.5 4.5"/>
+  </symbol>
+  <symbol id="i-config" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 7h9M19 7h1M4 17h1M11 17h9"/>
+    <circle cx="16" cy="7" r="2.5"/>
+    <circle cx="8" cy="17" r="2.5"/>
+  </symbol>
+  <symbol id="i-buscar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="6.5"/>
+    <path d="M16 16l4.5 4.5"/>
+  </symbol>
+  <symbol id="i-excel" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="3.5" width="16" height="17" rx="2"/>
+    <path d="M4 9.5h16M4 15h16M10 9.5v11"/>
+  </symbol>
+  <symbol id="i-reloj" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 7v5l3 2"/>
+  </symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5v14M5 12h14"/>
+  </symbol>
+  <symbol id="i-editar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3zM13.5 7.5l3 3"/>
+  </symbol>
+  <symbol id="i-basura" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5"/>
+  </symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6l12 12M18 6L6 18"/>
+  </symbol>
+  <symbol id="i-imagen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.5" y="4.5" width="17" height="15" rx="2"/>
+    <circle cx="9" cy="10" r="1.5"/>
+    <path d="M3.5 17l5-4.5 4 3.5 3-2.5 5 4.5"/>
+  </symbol>
+  <symbol id="i-alerta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.5L2.5 20h19L12 3.5zM12 10v4.5M12 17.2h.01"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 12.5l4.5 4.5L19 7.5"/>
+  </symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 11v5M12 7.8h.01"/>
+  </symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6l6 6-6 6"/>
+  </symbol>
+  <symbol id="i-subir" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 16V4M7.5 8.5L12 4l4.5 4.5M4 16v3.5h16V16"/>
+  </symbol>
+</svg>

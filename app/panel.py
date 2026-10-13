@@ -1,4 +1,4 @@
-"""Panel web: marcaciones y empleados (con ABM). Jinja2 + HTMX.
+"""Panel web: hoy, marcaciones, empleados (con ABM) y configuración. Jinja2 + HTMX.
 
 Solo responde a clientes locales (127.0.0.1 / ::1): el servidor escucha en toda la red
 porque el reloj lo necesita, pero el panel no tiene que verse desde afuera. Los POST además
@@ -9,18 +9,19 @@ from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlencode, urlsplit
 
-from fastapi import APIRouter, Depends, FastAPI, Form, HTTPException, Request
-from fastapi.responses import RedirectResponse, Response
+from fastapi import APIRouter, Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app import db, reports
+from app import colegio, db, jornada, reports
 from app.config import PORT
 from app.iclock import comando_baja, comando_usuario
 
 BASE_DIR = Path(__file__).resolve().parent
 LIMITE_FILAS = 500
 LIMITE_COMANDOS = 20
+LIMITE_HOY = 50_000  # marcaciones de un solo día: nunca se llega
 RELOJ_CONECTADO_SEGUNDOS = 30  # último contacto más reciente que esto = reloj conectado
 ADMIN = 14  # privilegio de administrador (deducido del único usuario real, no verificado)
 PRIVILEGIOS = {0: "Usuario", ADMIN: "Administrador"}
@@ -38,8 +39,44 @@ def etiqueta_estado(estado: str, codigo: int | None) -> str:
   return estado
 
 
+def _hace_txt(segundos: int) -> str:
+  if segundos < 120:
+    return f"{segundos} s"
+  if segundos < 7200:
+    return f"{segundos // 60} min"
+  return f"{segundos // 3600} h"
+
+
+def estado_reloj() -> dict:
+  """Estado del reloj para el indicador de la barra (se arma en cada render)."""
+  reloj = db.ultimo_reloj()
+  hace = None
+  if reloj:
+    ultimo = datetime.fromisoformat(reloj["ultimo_contacto"])
+    hace = max(0, int((db.ahora() - ultimo).total_seconds()))
+  return {
+    "reloj": reloj,
+    "hace": None if hace is None else _hace_txt(hace),
+    "conectado": hace is not None and hace < RELOJ_CONECTADO_SEGUNDOS,
+  }
+
+
+def datos_colegio() -> dict:
+  """Nombre y logo para la barra superior: {'nombre', 'logo' (URL o '')}."""
+  datos = colegio.leer()
+  return {
+    "nombre": datos["nombre"],
+    "logo": f"/colegio/logo?v={colegio.version_logo()}" if datos["logo"] else "",
+  }
+
+
 templates = Jinja2Templates(directory=BASE_DIR / "templates")  # autoescape activado
-templates.env.globals.update(etiqueta_estado=etiqueta_estado, PRIVILEGIOS=PRIVILEGIOS, ADMIN=ADMIN)
+templates.env.globals.update(
+  etiqueta_estado=etiqueta_estado, PRIVILEGIOS=PRIVILEGIOS, ADMIN=ADMIN,
+  estado_reloj=estado_reloj, datos_colegio=datos_colegio, ESTADOS=jornada.ESTADOS,
+  fmt_hm=jornada.fmt_hm, fmt_horas=jornada.fmt_horas, MARCAS_HORA=jornada.MARCAS_HORA,
+  INICIO_HORA=jornada.INICIO_MIN // 60, ESCALA_HORAS=jornada.ESCALA_MIN // 60,
+)
 
 
 def _es_local(scope) -> bool:
@@ -106,11 +143,30 @@ def _filtros(request: Request) -> tuple[str | None, str | None, str | None]:
   return desde, hasta, q.get("pin") or None
 
 
+def _filas_marcaciones(filas, truncado: bool) -> list[dict]:
+  """Filas para la tabla: fecha y hora separadas y el Tipo (misma regla que el Excel).
+
+  Si la lista se cortó por el límite, el día más viejo puede estar incompleto y su Tipo
+  sería engañoso (la "entrada" real quedó afuera): ese día se muestra sin Tipo.
+  """
+  tipos = jornada.tipos_de_marcaciones(filas)
+  incompleto = min((f["fecha_hora"][:10] for f in filas), default=None) if truncado else None
+  resultado = []
+  for f, tipo in zip(filas, tipos):
+    momento = datetime.fromisoformat(f["fecha_hora"])
+    resultado.append({
+      "fecha": f"{momento:%d/%m/%Y}", "hora": f"{momento:%H:%M:%S}", "pin": f["pin"],
+      "nombre": f["nombre"], "verificacion": f["verificacion"], "sn": f["sn"],
+      "tipo": "" if f["fecha_hora"][:10] == incompleto else tipo,
+    })
+  return resultado
+
+
 def _contexto_marcaciones(request: Request) -> dict:
   desde, hasta, pin = _filtros(request)
   filas, truncado = db.listar_marcaciones(desde, hasta, pin, LIMITE_FILAS)
   return {
-    "filas": filas,
+    "filas": _filas_marcaciones(filas, truncado),
     "truncado": truncado,
     "limite": LIMITE_FILAS,
     # La URL del refresco repite los filtros tal cual llegaron (sin filtros = siempre "hoy")
@@ -130,7 +186,44 @@ def favicon():
 
 @router.get("/")
 def inicio():
-  return RedirectResponse("/marcaciones")
+  return RedirectResponse("/hoy")
+
+
+def _contexto_hoy() -> dict:
+  ahora = db.ahora()
+  dia = ahora.date().isoformat()
+  marcaciones, _ = db.listar_marcaciones(dia, dia, None, LIMITE_HOY)
+  vista = jornada.vista_hoy(db.listar_empleados(), marcaciones, ahora)
+  return {
+    "vista": vista,
+    "fecha_larga": jornada.fecha_larga(ahora),
+    "dia_iso": dia,
+    "hora": f"{ahora:%H:%M}",
+    "actualizado": f"{ahora:%H:%M:%S}",
+    "nadie_marco": bool(vista.filas) and vista.conteos[jornada.SIN_MARCAR] == len(vista.filas),
+  }
+
+
+@router.get("/hoy")
+def hoy(request: Request, estado: str = "", q: str = ""):
+  contexto = _contexto_hoy()
+  # El filtro vive en la URL (lo aplica panel.js en el navegador); acá solo se repone en la página
+  contexto.update(activo="hoy", estado=estado if estado in jornada.ESTADOS else "", q=q[:80])
+  return templates.TemplateResponse(request, "hoy.html", contexto)
+
+
+@router.get("/hoy/tabla")
+def hoy_tabla(request: Request):
+  """Parcial HTMX: planilla (principal) + título y resumen (fuera de banda), cada 5 s."""
+  contexto = _contexto_hoy()
+  contexto["oob"] = True
+  return templates.TemplateResponse(request, "_hoy.html", contexto)
+
+
+@router.get("/reloj")
+def reloj_parcial(request: Request):
+  """Parcial HTMX: indicador del reloj de la barra superior."""
+  return templates.TemplateResponse(request, "_reloj.html", {})
 
 
 @router.get("/marcaciones")
@@ -154,7 +247,8 @@ def marcaciones_excel(request: Request):
   filas, truncado = db.listar_marcaciones(desde, hasta, pin, reports.LIMITE_EXCEL)
   emp = db.obtener_empleado(pin) if pin else None
   contenido = reports.generar_excel(
-    reversed(filas), desde, hasta, pin, emp["nombre"] if emp else None, truncado)
+    reversed(filas), desde, hasta, pin, emp["nombre"] if emp else None, truncado,
+    colegio=colegio.leer()["nombre"], logo=colegio.ruta_logo(), tipo_logo=colegio.tipo_logo())
   nombre = f"asistencia_{desde or 'todo'}_{hasta or 'todo'}.xlsx"
   return Response(contenido, media_type=XLSX,
                   headers={"Content-Disposition": f'attachment; filename="{nombre}"'})
@@ -186,27 +280,11 @@ def _privilegio(valor: str) -> int | None:
   return privilegio if privilegio in PRIVILEGIOS else None
 
 
-def _hace_txt(segundos: int) -> str:
-  if segundos < 120:
-    return f"{segundos} s"
-  if segundos < 7200:
-    return f"{segundos // 60} min"
-  return f"{segundos // 3600} h"
-
-
 def _contexto_estado() -> dict:
-  """Lo que se refresca solo en /empleados: reloj, tabla de empleados y últimos comandos."""
-  reloj = db.ultimo_reloj()
-  hace = None
-  if reloj:
-    ultimo = datetime.fromisoformat(reloj["ultimo_contacto"])
-    hace = max(0, int((db.ahora() - ultimo).total_seconds()))
+  """Lo que se refresca solo en /empleados: tabla de empleados y últimos comandos."""
   return {
     "empleados": db.listar_empleados(),
     "comandos": db.listar_comandos(LIMITE_COMANDOS),
-    "reloj": reloj,
-    "hace": None if hace is None else _hace_txt(hace),
-    "conectado": hace is not None and hace < RELOJ_CONECTADO_SEGUNDOS,
     "ahora": datetime.now().strftime("%H:%M:%S"),
   }
 
@@ -250,7 +328,7 @@ def empleados(request: Request):
 
 @router.get("/empleados/estado")
 def empleados_estado(request: Request):
-  """Parcial HTMX: tabla de empleados + (fuera de banda) reloj y últimos comandos."""
+  """Parcial HTMX: tabla de empleados + (fuera de banda) últimos comandos."""
   contexto = _contexto_estado()
   contexto["oob"] = True
   return templates.TemplateResponse(request, "_estado_empleados.html", contexto)
@@ -318,3 +396,60 @@ def empleado_baja(request: Request, pin: str):
     return _pagina_empleados(request, rechazo[1], rechazo[0])
   db.encolar_comando(emp["sn"], pin, "baja", comando_baja(pin))  # la fila se borra al confirmar
   return RedirectResponse("/empleados", status_code=303)
+
+
+# --- Configuración: nombre y logo del colegio -------------------------------------------------
+
+def _pagina_configuracion(request: Request, error: str | None = None, status_code: int = 200,
+                          nombre: str | None = None):
+  return templates.TemplateResponse(
+    request, "configuracion.html",
+    {"activo": "configuracion", "error": error, "guardado": "guardado" in request.query_params,
+     "nombre": colegio.leer()["nombre"] if nombre is None else nombre,
+     "logo_tipo": colegio.tipo_logo(), "nombre_max": colegio.NOMBRE_MAX,
+     "logo_max_kb": colegio.LOGO_MAX_BYTES // 1024},
+    status_code=status_code,
+  )
+
+
+@router.get("/configuracion")
+def configuracion(request: Request):
+  return _pagina_configuracion(request)
+
+
+@router.post("/configuracion", dependencies=csrf)
+def configuracion_guardar(request: Request, nombre: str = Form(""),
+                          logo: UploadFile | None = File(None)):
+  """Guarda nombre y (si viene) logo. Si algo no es válido no se guarda nada."""
+  nombre = nombre.strip()
+  error = colegio.error_nombre(nombre)
+  nuevo_logo = None
+  if not error and logo is not None and logo.filename:
+    contenido = logo.file.read(colegio.LOGO_MAX_BYTES + 1)
+    ext, error = colegio.validar_logo(contenido)
+    if ext:
+      nuevo_logo = (ext, contenido)
+  if error:
+    return _pagina_configuracion(request, error, 400, nombre)
+  colegio.guardar(nombre, nuevo_logo)
+  return RedirectResponse("/configuracion?guardado=1", status_code=303)
+
+
+@router.post("/configuracion/logo/quitar", dependencies=csrf)
+def configuracion_quitar_logo():
+  colegio.quitar_logo()
+  return RedirectResponse("/configuracion?guardado=1", status_code=303)
+
+
+@router.get("/colegio/logo")
+def colegio_logo():
+  """El logo cargado en Configuración (solo desde esta PC, como todo el panel)."""
+  ruta = colegio.ruta_logo()
+  if ruta is None:
+    raise HTTPException(status_code=404, detail="Todavía no se cargó un logo")
+  # Un SVG abierto directo no puede ejecutar nada: sin scripts y en sandbox
+  return FileResponse(ruta, media_type=colegio.tipo_logo(), headers={
+    "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+    "X-Content-Type-Options": "nosniff",
+    "Cache-Control": "no-cache",
+  })

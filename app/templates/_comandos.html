@@ -1,9 +1,8 @@
 <div id="comandos"{% if oob %} hx-swap-oob="true"{% endif %}>
-  <h3>Últimos comandos</h3>
   <div class="tabla-scroll">
-    <table class="comandos">
+    <table class="planilla-tabla comandos">
       <thead>
-        <tr class="encabezado"><th>Id</th><th>Tipo</th><th>PIN</th><th>Estado</th><th>Entregas</th><th>Creado</th><th>Enviado</th><th>Confirmado</th></tr>
+        <tr class="encabezado"><th scope="col">Id</th><th scope="col">Tipo</th><th scope="col">PIN</th><th scope="col">Estado</th><th scope="col">Entregas</th><th scope="col">Creado</th><th scope="col">Enviado</th><th scope="col">Confirmado</th></tr>
       </thead>
       <tbody>
         {% for c in comandos %}
@@ -18,7 +17,7 @@
           <td>{{ c.confirmado or "" }}</td>
         </tr>
         {% else %}
-        <tr class="fila-vacia"><td colspan="8" class="vacio">Todavía no se envió ningún comando.</td></tr>
+        <tr class="fila-vacia"><td colspan="8" class="vacio">Todavía no se envió ningún comando. Cuando agregues, modifiques o des de baja a alguien, el comando aparece acá con su estado.</td></tr>
         {% endfor %}
       </tbody>
     </table>

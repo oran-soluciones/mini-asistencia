@@ -1,0 +1,5 @@
+{% from "_iconos.html" import ico %}
+<div id="hoy-titulo" class="titulo-fila"{% if oob %} hx-swap-oob="true"{% endif %}>
+  <h1>{{ fecha_larga }}</h1>
+  <p class="hora-actual" title="Hora de esta PC">{{ ico("reloj") }}<time datetime="{{ dia_iso }}T{{ hora }}">{{ hora }}</time></p>
+</div>

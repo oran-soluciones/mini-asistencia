@@ -1,22 +1,45 @@
+{% from "_iconos.html" import ico %}
 <!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
   <title>{% block titulo %}{% endblock %} - mini-asistencia</title>
   <link rel="icon" type="image/svg+xml" href="/static/icono.svg">
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/htmx.min.js"></script>
+  <script src="/static/panel.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>mini-asistencia</h1>
-    <nav>
-      <a href="/marcaciones"{% if activo == "marcaciones" %} class="activo"{% endif %}>Marcaciones</a>
-      <a href="/empleados"{% if activo == "empleados" %} class="activo"{% endif %}>Empleados</a>
-    </nav>
+  <a class="saltar" href="#contenido">Saltar al contenido</a>
+  {% set colegio = datos_colegio() %}
+  <header class="barra">
+    <div class="barra-in">
+      <div class="marca">
+        {% if colegio.logo %}
+        <span class="marca-disco"><img src="{{ colegio.logo }}" alt="{{ '' if colegio.nombre else 'Logo del colegio' }}"></span>
+        {% else %}
+        <a class="marca-vacia" href="/configuracion" title="Cargá el logo del colegio" aria-label="Cargá el logo del colegio">{{ ico("imagen") }}</a>
+        {% endif %}
+        {% if colegio.nombre %}
+        <span class="marca-nombre">{{ colegio.nombre }}</span>
+        {% else %}
+        <a class="marca-aviso" href="/configuracion">{{ "Cargá el nombre del colegio" if colegio.logo else "Cargá el nombre y el logo del colegio" }}</a>
+        {% endif %}
+      </div>
+      <nav class="nav" aria-label="Secciones">
+        <a href="/hoy"{% if activo == "hoy" %} aria-current="page"{% endif %}>{{ ico("hoy") }}<span>Hoy</span></a>
+        <a href="/marcaciones"{% if activo == "marcaciones" %} aria-current="page"{% endif %}>{{ ico("marcaciones") }}<span>Marcaciones</span></a>
+        <a href="/empleados"{% if activo == "empleados" %} aria-current="page"{% endif %}>{{ ico("empleados") }}<span>Empleados</span></a>
+        <a href="/configuracion"{% if activo == "configuracion" %} aria-current="page"{% endif %}>{{ ico("config") }}<span>Configuración</span></a>
+      </nav>
+      {% include "_reloj.html" %}
+    </div>
   </header>
-  <main>
+  <p class="aviso-conexion" id="aviso-conexion" role="status" hidden>{{ ico("alerta") }}No se pudo actualizar: el panel no responde. Se vuelve a intentar solo cada pocos segundos.</p>
+  <main id="contenido">
     {% block contenido %}{% endblock %}
   </main>
 </body>

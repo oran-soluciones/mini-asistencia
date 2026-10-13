@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "_iconos.html" import ico %}
+{% block titulo %}Configuración{% endblock %}
+{% block contenido %}
+{% set colegio = datos_colegio() %}
+<div class="titulo-fila">
+  <h1>Configuración</h1>
+</div>
+{% if guardado %}
+<p class="alerta alerta-ok" role="status">{{ ico("check") }}<span>Guardado.</span></p>
+{% endif %}
+{% if error %}
+<p class="alerta alerta-error" role="alert">{{ ico("alerta") }}<span>{{ error }}</span></p>
+{% endif %}
+<form method="post" action="/configuracion" enctype="multipart/form-data" class="config" id="form-config">
+  <h2>Datos del colegio</h2>
+  <p class="ayuda">Salen en la barra superior y en el encabezado del Excel de asistencia.</p>
+  <div class="campo">
+    <label for="nombre">Nombre del colegio</label>
+    <input id="nombre" type="text" name="nombre" value="{{ nombre }}" maxlength="{{ nombre_max }}" autocomplete="off">
+    <p class="ayuda">Hasta {{ nombre_max }} caracteres.</p>
+  </div>
+  <div class="campo">
+    <label for="logo">Logo</label>
+    <input id="logo" type="file" name="logo" accept="image/png,image/jpeg,image/svg+xml" data-max="{{ logo_max_kb * 1024 }}">
+    <p class="ayuda">PNG, JPG o SVG, hasta 1 MB. Si no elegís un archivo se conserva el logo actual. El Excel inserta el logo solo si es PNG o JPG; con SVG el Excel lleva únicamente el nombre.</p>
+    <p class="alerta alerta-error" id="logo-error" role="alert" hidden>{{ ico("alerta") }}<span></span></p>
+  </div>
+  <div class="campo">
+    <span class="etiqueta">Vista previa</span>
+    <div class="previa">
+      <div class="previa-logo">
+        {% if logo_tipo %}<img id="previa-img" src="{{ colegio.logo }}" alt="Logo actual del colegio">
+        {% else %}<span class="previa-vacia" id="previa-vacia">{{ ico("imagen") }}<span>Sin logo</span></span><img id="previa-img" alt="Logo elegido" hidden>{% endif %}
+      </div>
+      <div class="previa-barra" aria-hidden="true">
+        <span class="disco"><img id="previa-disco" src="{{ colegio.logo }}" alt=""{% if not logo_tipo %} hidden{% endif %}></span>
+        <span id="previa-nombre">{{ nombre or "Nombre del colegio" }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="acciones">
+    <button type="submit" class="btn btn-primario">Guardar</button>
+    {% if logo_tipo %}<button type="submit" class="btn btn-peligro" form="quitar-logo">{{ ico("basura") }}<span>Quitar logo</span></button>{% endif %}
+  </div>
+</form>
+<form id="quitar-logo" method="post" action="/configuracion/logo/quitar" hidden></form>
+{% endblock %}
