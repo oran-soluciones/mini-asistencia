@@ -1,5 +1,9 @@
 # Texto con LF en el repo
 * text=auto eol=lf
 
+# Scripts de Windows: CRLF (cmd.exe falla con LF)
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
 # Requests crudos del reloj: byte a byte, sin convertir fin de línea
 samples/** -text

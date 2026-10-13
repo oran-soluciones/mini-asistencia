@@ -11,6 +11,14 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
+# Skills de terceros: se copian tal cual, no reformatear
+[.claude/skills/**]
+indent_style = unset
+indent_size = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
 # Requests crudos del reloj: no tocar
 [samples/**]
 indent_style = unset
