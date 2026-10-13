@@ -1,0 +1,5 @@
+# Texto con LF en el repo
+* text=auto eol=lf
+
+# Requests crudos del reloj: byte a byte, sin convertir fin de línea
+samples/** -text

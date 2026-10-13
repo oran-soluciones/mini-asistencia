@@ -7,13 +7,13 @@ PORT = int(os.environ.get("MINI_ASISTENCIA_PORT", "8081"))
 
 # Carpeta de datos del usuario (SQLite, logs): nunca al lado del .exe
 if os.name == "nt":
-    DATA_DIR = Path(os.environ["LOCALAPPDATA"]) / "mini-asistencia"
+  DATA_DIR = Path(os.environ["LOCALAPPDATA"]) / "mini-asistencia"
 else:
-    DATA_DIR = Path.home() / ".local" / "share" / "mini-asistencia"
+  DATA_DIR = Path.home() / ".local" / "share" / "mini-asistencia"
 LOG_DIR = DATA_DIR / "logs"
 
 # Requests reales capturados del reloj (van al repo, se usan en tests)
 SAMPLES_DIR = Path(__file__).resolve().parent.parent / "samples"
 
 for _d in (DATA_DIR, LOG_DIR, SAMPLES_DIR):
-    _d.mkdir(parents=True, exist_ok=True)
+  _d.mkdir(parents=True, exist_ok=True)

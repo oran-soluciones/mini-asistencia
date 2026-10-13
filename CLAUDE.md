@@ -38,6 +38,8 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 
 ## Reglas
 - Priorizar simplicidad: pocos archivos, pocas dependencias, nada de sobre-ingeniería.
+- Indentación: 2 espacios en todos los archivos (Python incluido), nunca tabs. Fin de línea LF.
+  Lo fijan `.editorconfig`, `.gitattributes` y `.vscode/settings.json`.
 - Loguear SIEMPRE el request crudo que manda el reloj (método, URL, query, headers, body)
   y guardar ejemplos reales en `samples/` para usarlos en tests.
 - No asumir campos del protocolo sin verificarlos contra lo que realmente manda el reloj.
