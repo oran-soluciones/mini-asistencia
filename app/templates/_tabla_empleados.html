@@ -14,7 +14,7 @@
         <td class="num">{{ fmt_fh(e.actualizado) }}</td>
         <td class="num">{{ e.marcaciones }}</td>
         <td>
-          {%- if e.cmd_id %}<span class="estado est-{{ e.cmd_estado }}" title="comando #{{ e.cmd_id }}">{{ e.cmd_tipo }}: {{ etiqueta_estado(e.cmd_estado, e.cmd_codigo) }}</span>
+          {%- if e.cmd_id %}<span class="estado est-{{ e.cmd_estado }}" title="comando #{{ e.cmd_id }}">{{ e.cmd_tipo }}: {{ etiqueta_estado(e.cmd_estado, e.cmd_codigo)|capitalize }}</span>
           {%- else %}<span class="suave">–</span>{% endif -%}
         </td>
         <td class="acciones-celda">

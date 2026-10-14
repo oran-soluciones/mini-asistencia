@@ -126,7 +126,7 @@ def test_tras_max_entregas_sin_confirmar_pasa_a_error(client, db_path, hora):
   assert client.get(GETREQUEST).text == "OK"
   c = comandos(db_path)[0]
   assert (c["estado"], c["codigo_retorno"], c["intentos"]) == ("error", None, db.MAX_ENTREGAS)
-  assert "error (sin respuesta)" in client.get("/empleados").text
+  assert "Error (sin respuesta)" in client.get("/empleados").text
   # Una confirmación tardía todavía se acepta
   assert confirmar(client, 1).text == "OK"
   assert comandos(db_path)[0]["estado"] == "ok"
@@ -188,7 +188,7 @@ def test_devicecmd_return_distinto_de_0_es_error_con_codigo(client, db_path):
   confirmar(client, 1, -2)
   c = comandos(db_path)[0]
   assert (c["estado"], c["codigo_retorno"]) == ("error", -2)
-  assert "error (código -2)" in client.get("/empleados").text
+  assert "Error (código -2)" in client.get("/empleados").text
   assert client.get(GETREQUEST).text == "OK"  # no se reintenta solo un error del reloj
 
 
@@ -366,7 +366,7 @@ def test_baja_con_error_del_reloj_no_borra_la_fila(client, db_path):
   confirmar(client, 2, -1)
   assert [e["pin"] for e in empleados(db_path)] == ["99"]
   html = client.get("/empleados").text
-  assert "error (código -1)" in html and 'action="/empleados/99/baja"' in html  # se puede reintentar
+  assert "Error (código -1)" in html and 'action="/empleados/99/baja"' in html  # se puede reintentar
 
 
 def test_baja_o_edicion_de_empleado_inexistente(client):
@@ -448,17 +448,17 @@ def test_panel_muestra_el_estado_de_cada_comando(client, db_path, hora):
   con_reloj(client)
   alta(client, "97", "Pendiente")
   html = client.get("/empleados").text
-  assert "alta: pendiente" in html and 'class="estado est-pendiente"' in html
+  assert "alta: Pendiente" in html and 'class="estado est-pendiente"' in html
   client.get(GETREQUEST)
-  assert "alta: enviado" in client.get("/empleados").text
+  assert "alta: Enviado" in client.get("/empleados").text
   confirmar(client, 1)
   html = client.get("/empleados").text
-  assert "alta: confirmado" in html and "est-ok" in html
+  assert "alta: Confirmado" in html and "est-ok" in html
   alta(client, "96", "Falla")
   client.get(GETREQUEST)
   confirmar(client, 2, 3)
   html = client.get("/empleados").text
-  assert "alta: error (código 3)" in html and "est-error" in html
+  assert "alta: Error (código 3)" in html and "est-error" in html
 
 
 def test_panel_lista_ultimos_comandos_con_limite(client, db_path):
@@ -496,7 +496,7 @@ def test_parcial_de_estado_se_refresca_con_htmx(client, db_path):
   assert "<html" not in parcial and 'id="tabla-empleados"' in parcial
   assert 'id="comandos"' in parcial and parcial.count('hx-swap-oob="true"') == 1
   assert 'id="reloj"' not in parcial  # el indicador del reloj se refresca solo, en la barra
-  assert "alta: pendiente" in parcial
+  assert "alta: Pendiente" in parcial
 
 
 def test_indicador_del_reloj_esta_en_todas_las_vistas_y_se_refresca(client, db_path, hora):

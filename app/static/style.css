@@ -946,6 +946,8 @@ form.en-linea { display: inline; margin: 0; }
   h1 { font-size: var(--t3); }
   .titulo-fila { flex-wrap: wrap; margin-bottom: 16px; }
   .ultima { order: 3; flex: 1 0 100%; margin: 0; white-space: normal; }
+  /* El dato va en su propio renglón, alineado con la etiqueta (el padding es para el entintado) */
+  .ultima-dato { display: block; width: fit-content; margin: 2px 0 -3px -6px; }
 
   .segmentos { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
   .segmento { justify-content: center; height: 40px; padding: 0 8px; }
