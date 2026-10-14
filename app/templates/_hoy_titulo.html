@@ -1,7 +1,6 @@
 {% from "_iconos.html" import ico %}
 <div id="hoy-titulo" class="titulo-fila"{% if oob %} hx-swap-oob="true"{% endif %}>
   <div class="dia-titulo">
-    <h1>{{ fecha_larga }}</h1>
     <div class="dia-nav" role="group" aria-label="Elegir el día">
       <a class="dia-paso" href="/hoy?dia={{ dia_anterior }}" data-dia="{{ dia_anterior }}" aria-label="Día anterior" title="Día anterior">{{ ico("chevron", "girado") }}</a>
       <button type="button" class="dia-calendario" data-calendario aria-label="Elegir otro día en el calendario">{{ ico("calendario") }}<span>Elegir día</span></button>
@@ -11,6 +10,7 @@
       <span class="dia-paso" aria-disabled="true" title="Hoy es el último día">{{ ico("chevron") }}</span>
       {%- endif %}
     </div>
+    <h1>{{ fecha_larga }}</h1>
     {% if not es_hoy %}<a class="btn btn-ghost btn-chico" href="/hoy" data-dia="{{ hoy_iso }}">Volver a hoy</a>{% endif %}
   </div>
   {% if vista.ultima %}

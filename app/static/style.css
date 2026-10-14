@@ -290,7 +290,12 @@ main {
 .ultima-dato { display: inline-block; margin: -3px -6px -3px 0; padding: 3px 6px; border-radius: 6px; }
 /* Hoy: elegir el día (anterior, calendario, siguiente) */
 .hoy { position: relative; }
+/* Fila del título de Hoy: el selector de día bien a la izquierda y todo centrado en altura */
+#hoy-titulo { align-items: center; flex-wrap: wrap; }
+/* Si no entra todo en una fila, la última marcación baja de renglón en vez de cortarse */
+#hoy-titulo .ultima { min-width: min(100%, 26em); }
 .dia-titulo { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; min-width: 0; }
+.dia-titulo h1 { line-height: 1.1; }
 .dia-nav {
   display: inline-flex;
   align-items: stretch;
