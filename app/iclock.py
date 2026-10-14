@@ -170,7 +170,16 @@ def _reply(request: Request) -> str:
   return "OK"
 
 
+def _es_rutina(request: Request, body: bytes, reply: str) -> bool:
+  """El getrequest de cada 2-5 s sin comandos ni INFO: no aporta nada nuevo como sample (sería
+  un archivo cada pocos segundos, unos 20.000 por día). Igual queda en el log crudo."""
+  return (request.method == "GET" and request.url.path.lower() == "/iclock/getrequest"
+          and reply == "OK" and not body and "INFO" not in request.query_params)
+
+
 def _save_sample(request: Request, body: bytes, reply: str) -> None:
+  if _es_rutina(request, body, reply):
+    return
   now = datetime.now()
   name = request.url.path.strip("/").replace("/", "_") or "root"
   fname = f"{now:%Y%m%d-%H%M%S-%f}_{request.method}_{name}.txt"

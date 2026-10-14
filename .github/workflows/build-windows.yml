@@ -1,0 +1,60 @@
+# Genera mini-asistencia.exe en Windows: corre los tests y empaqueta con PyInstaller.
+# - En cada push a main y a mano (Actions > build-windows > Run workflow): queda como artifact.
+# - Con un tag v* (p. ej. v1.0.0): además crea un Release de GitHub con el .exe adjunto.
+name: build-windows
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write  # para crear el Release en los tags
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt -r requirements-dev.txt
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Empaquetar
+        run: python -m PyInstaller mini-asistencia.spec --noconfirm
+
+      - name: Probar que el .exe arranca
+        shell: pwsh
+        run: |
+          $env:MINI_ASISTENCIA_DATA_DIR = "$env:RUNNER_TEMP\datos"
+          $env:MINI_ASISTENCIA_PORT = "8099"
+          Start-Process dist\mini-asistencia.exe -ArgumentList "--sin-navegador", "--sin-bandeja"
+          $ok = $false
+          for ($i = 0; $i -lt 60 -and -not $ok; $i++) {
+            Start-Sleep -Seconds 1
+            try { $ok = (Invoke-WebRequest "http://127.0.0.1:8099/hoy" -UseBasicParsing).StatusCode -eq 200 } catch {}
+          }
+          Get-Process mini-asistencia | Stop-Process -Force  # el .exe de un archivo deja un proceso hijo
+          if (-not $ok) { Get-Content "$env:RUNNER_TEMP\datos\logs\iclock.log" -ErrorAction SilentlyContinue; exit 1 }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mini-asistencia
+          path: dist/mini-asistencia.exe
+
+      - name: Release (solo tags v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/mini-asistencia.exe --title "${{ github.ref_name }}" --generate-notes

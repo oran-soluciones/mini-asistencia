@@ -226,11 +226,19 @@ def test_devicecmd_repetido_no_cambia_nada(client, db_path):
 
 
 def test_requests_del_reloj_se_guardan_en_samples(client, tmp_path):
-  client.get(GETREQUEST)
+  def getrequests():
+    return [f for f in tmp_path.glob("*.txt") if "GET_iclock_getrequest" in f.name]
+
+  # El getrequest de rutina (cada 2-5 s, responde OK) no se guarda: serían miles por día
+  con_reloj(client)
+  assert getrequests() == []
+  client.get(GETREQUEST + "&INFO=Ver%201.0.21,1,0,10,192.168.0.20")  # el primero, con INFO
+  assert len(getrequests()) == 1
+  alta(client)
+  assert client.get(GETREQUEST).text.startswith("C:1:")  # entrega un comando: se guarda
+  assert len(getrequests()) == 2
   confirmar(client, 1)
-  nombres = [f.name for f in tmp_path.glob("*.txt")]
-  assert any("GET_iclock_getrequest" in n for n in nombres)
-  assert any("POST_iclock_devicecmd" in n for n in nombres)
+  assert any("POST_iclock_devicecmd" in f.name for f in tmp_path.glob("*.txt"))
 
 
 # --- alta / modificación / baja desde el panel ----------------------------------------------
