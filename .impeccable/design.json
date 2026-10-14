@@ -1,0 +1,723 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-13T00:00:00-03:00",
+  "title": "Design System: mini-asistencia",
+  "extensions": {
+    "colorMeta": {
+      "tinta": {
+        "role": "primary",
+        "displayName": "Tinta de birome",
+        "canonical": "#2747b8",
+        "oklch": "oklch(44.9% 0.182 266.6)",
+        "tonalRamp": [
+          "oklch(15% 0.182 266.6)",
+          "oklch(26% 0.182 266.6)",
+          "oklch(38% 0.182 266.6)",
+          "oklch(49% 0.182 266.6)",
+          "oklch(61% 0.182 266.6)",
+          "oklch(72% 0.182 266.6)",
+          "oklch(84% 0.182 266.6)",
+          "oklch(95% 0.182 266.6)"
+        ]
+      },
+      "tinta-hover": {
+        "role": "primary",
+        "displayName": "Tinta de birome, hover",
+        "canonical": "#1f3a99",
+        "oklch": "oklch(39.3% 0.158 266.6)",
+        "tonalRamp": [
+          "oklch(15% 0.158 266.6)",
+          "oklch(26% 0.158 266.6)",
+          "oklch(38% 0.158 266.6)",
+          "oklch(49% 0.158 266.6)",
+          "oklch(61% 0.158 266.6)",
+          "oklch(72% 0.158 266.6)",
+          "oklch(84% 0.158 266.6)",
+          "oklch(95% 0.158 266.6)"
+        ]
+      },
+      "tinta-activa": {
+        "role": "primary",
+        "displayName": "Tinta de birome, presionada",
+        "canonical": "#182e7a",
+        "oklch": "oklch(33.7% 0.132 266.6)",
+        "tonalRamp": [
+          "oklch(15% 0.132 266.6)",
+          "oklch(26% 0.132 266.6)",
+          "oklch(38% 0.132 266.6)",
+          "oklch(49% 0.132 266.6)",
+          "oklch(61% 0.132 266.6)",
+          "oklch(72% 0.132 266.6)",
+          "oklch(84% 0.132 266.6)",
+          "oklch(95% 0.132 266.6)"
+        ]
+      },
+      "tinta-clara": {
+        "role": "primary",
+        "displayName": "Tinta clara (foco sobre pizarrón)",
+        "canonical": "#aebdf5",
+        "oklch": "oklch(80.7% 0.081 272.8)",
+        "tonalRamp": [
+          "oklch(15% 0.081 272.8)",
+          "oklch(26% 0.081 272.8)",
+          "oklch(38% 0.081 272.8)",
+          "oklch(49% 0.081 272.8)",
+          "oklch(61% 0.081 272.8)",
+          "oklch(72% 0.081 272.8)",
+          "oklch(84% 0.081 272.8)",
+          "oklch(95% 0.081 272.8)"
+        ]
+      },
+      "pizarra": {
+        "role": "secondary",
+        "displayName": "Verde pizarrón",
+        "canonical": "#1d3a33",
+        "oklch": "oklch(32.3% 0.038 176.4)",
+        "tonalRamp": [
+          "oklch(15% 0.038 176.4)",
+          "oklch(26% 0.038 176.4)",
+          "oklch(38% 0.038 176.4)",
+          "oklch(49% 0.038 176.4)",
+          "oklch(61% 0.038 176.4)",
+          "oklch(72% 0.038 176.4)",
+          "oklch(84% 0.038 176.4)",
+          "oklch(95% 0.038 176.4)"
+        ]
+      },
+      "tiza": {
+        "role": "secondary",
+        "displayName": "Tiza",
+        "canonical": "#eef2ec",
+        "oklch": "oklch(95.6% 0.009 134.9)",
+        "tonalRamp": [
+          "oklch(15% 0.009 134.9)",
+          "oklch(26% 0.009 134.9)",
+          "oklch(38% 0.009 134.9)",
+          "oklch(49% 0.009 134.9)",
+          "oklch(61% 0.009 134.9)",
+          "oklch(72% 0.009 134.9)",
+          "oklch(84% 0.009 134.9)",
+          "oklch(95% 0.009 134.9)"
+        ]
+      },
+      "tiza-suave": {
+        "role": "secondary",
+        "displayName": "Tiza suave",
+        "canonical": "#b9cbc1",
+        "oklch": "oklch(82.6% 0.024 161.6)",
+        "tonalRamp": [
+          "oklch(15% 0.024 161.6)",
+          "oklch(26% 0.024 161.6)",
+          "oklch(38% 0.024 161.6)",
+          "oklch(49% 0.024 161.6)",
+          "oklch(61% 0.024 161.6)",
+          "oklch(72% 0.024 161.6)",
+          "oklch(84% 0.024 161.6)",
+          "oklch(95% 0.024 161.6)"
+        ]
+      },
+      "verde": {
+        "role": "tertiary",
+        "displayName": "Verde \"En el colegio\"",
+        "canonical": "#1f7a4a",
+        "oklch": "oklch(51.5% 0.113 155.3)",
+        "tonalRamp": [
+          "oklch(15% 0.113 155.3)",
+          "oklch(26% 0.113 155.3)",
+          "oklch(38% 0.113 155.3)",
+          "oklch(49% 0.113 155.3)",
+          "oklch(61% 0.113 155.3)",
+          "oklch(72% 0.113 155.3)",
+          "oklch(84% 0.113 155.3)",
+          "oklch(95% 0.113 155.3)"
+        ]
+      },
+      "pizarra-estado": {
+        "role": "tertiary",
+        "displayName": "Pizarra \"Se retiró\"",
+        "canonical": "#4a5a68",
+        "oklch": "oklch(45.9% 0.030 244.9)",
+        "tonalRamp": [
+          "oklch(15% 0.030 244.9)",
+          "oklch(26% 0.030 244.9)",
+          "oklch(38% 0.030 244.9)",
+          "oklch(49% 0.030 244.9)",
+          "oklch(61% 0.030 244.9)",
+          "oklch(72% 0.030 244.9)",
+          "oklch(84% 0.030 244.9)",
+          "oklch(95% 0.030 244.9)"
+        ]
+      },
+      "ambar": {
+        "role": "tertiary",
+        "displayName": "Ámbar \"Sin marcar\"",
+        "canonical": "#a5650a",
+        "oklch": "oklch(56.5% 0.122 66.5)",
+        "tonalRamp": [
+          "oklch(15% 0.122 66.5)",
+          "oklch(26% 0.122 66.5)",
+          "oklch(38% 0.122 66.5)",
+          "oklch(49% 0.122 66.5)",
+          "oklch(61% 0.122 66.5)",
+          "oklch(72% 0.122 66.5)",
+          "oklch(84% 0.122 66.5)",
+          "oklch(95% 0.122 66.5)"
+        ]
+      },
+      "rojo": {
+        "role": "tertiary",
+        "displayName": "Rojo de peligro",
+        "canonical": "#b42318",
+        "oklch": "oklch(50.0% 0.182 29.5)",
+        "tonalRamp": [
+          "oklch(15% 0.182 29.5)",
+          "oklch(26% 0.182 29.5)",
+          "oklch(38% 0.182 29.5)",
+          "oklch(49% 0.182 29.5)",
+          "oklch(61% 0.182 29.5)",
+          "oklch(72% 0.182 29.5)",
+          "oklch(84% 0.182 29.5)",
+          "oklch(95% 0.182 29.5)"
+        ]
+      },
+      "verde-fondo": {
+        "role": "tertiary",
+        "displayName": "Fondo verde de alerta OK",
+        "canonical": "#e8f3ec",
+        "oklch": "oklch(95.4% 0.015 158.2)",
+        "tonalRamp": [
+          "oklch(15% 0.015 158.2)",
+          "oklch(26% 0.015 158.2)",
+          "oklch(38% 0.015 158.2)",
+          "oklch(49% 0.015 158.2)",
+          "oklch(61% 0.015 158.2)",
+          "oklch(72% 0.015 158.2)",
+          "oklch(84% 0.015 158.2)",
+          "oklch(95% 0.015 158.2)"
+        ]
+      },
+      "ambar-fondo": {
+        "role": "tertiary",
+        "displayName": "Fondo ámbar de aviso",
+        "canonical": "#fbf3e3",
+        "oklch": "oklch(96.6% 0.023 84.6)",
+        "tonalRamp": [
+          "oklch(15% 0.023 84.6)",
+          "oklch(26% 0.023 84.6)",
+          "oklch(38% 0.023 84.6)",
+          "oklch(49% 0.023 84.6)",
+          "oklch(61% 0.023 84.6)",
+          "oklch(72% 0.023 84.6)",
+          "oklch(84% 0.023 84.6)",
+          "oklch(95% 0.023 84.6)"
+        ]
+      },
+      "rojo-fondo": {
+        "role": "tertiary",
+        "displayName": "Fondo rojo de error",
+        "canonical": "#fdeceb",
+        "oklch": "oklch(95.6% 0.019 21.6)",
+        "tonalRamp": [
+          "oklch(15% 0.019 21.6)",
+          "oklch(26% 0.019 21.6)",
+          "oklch(38% 0.019 21.6)",
+          "oklch(49% 0.019 21.6)",
+          "oklch(61% 0.019 21.6)",
+          "oklch(72% 0.019 21.6)",
+          "oklch(84% 0.019 21.6)",
+          "oklch(95% 0.019 21.6)"
+        ]
+      },
+      "fondo": {
+        "role": "neutral",
+        "displayName": "Blanco frío",
+        "canonical": "#f5f7f4",
+        "oklch": "oklch(97.4% 0.004 134.8)",
+        "tonalRamp": [
+          "oklch(15% 0.004 134.8)",
+          "oklch(26% 0.004 134.8)",
+          "oklch(38% 0.004 134.8)",
+          "oklch(49% 0.004 134.8)",
+          "oklch(61% 0.004 134.8)",
+          "oklch(72% 0.004 134.8)",
+          "oklch(84% 0.004 134.8)",
+          "oklch(95% 0.004 134.8)"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Superficie blanca",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(26% 0.000 89.9)",
+          "oklch(38% 0.000 89.9)",
+          "oklch(49% 0.000 89.9)",
+          "oklch(61% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "superficie-2": {
+        "role": "neutral",
+        "displayName": "Superficie 2",
+        "canonical": "#edf1ed",
+        "oklch": "oklch(95.4% 0.007 145.5)",
+        "tonalRamp": [
+          "oklch(15% 0.007 145.5)",
+          "oklch(26% 0.007 145.5)",
+          "oklch(38% 0.007 145.5)",
+          "oklch(49% 0.007 145.5)",
+          "oklch(61% 0.007 145.5)",
+          "oklch(72% 0.007 145.5)",
+          "oklch(84% 0.007 145.5)",
+          "oklch(95% 0.007 145.5)"
+        ]
+      },
+      "borde": {
+        "role": "neutral",
+        "displayName": "Borde",
+        "canonical": "#d6ded7",
+        "oklch": "oklch(89.2% 0.013 149.2)",
+        "tonalRamp": [
+          "oklch(15% 0.013 149.2)",
+          "oklch(26% 0.013 149.2)",
+          "oklch(38% 0.013 149.2)",
+          "oklch(49% 0.013 149.2)",
+          "oklch(61% 0.013 149.2)",
+          "oklch(72% 0.013 149.2)",
+          "oklch(84% 0.013 149.2)",
+          "oklch(95% 0.013 149.2)"
+        ]
+      },
+      "borde-fuerte": {
+        "role": "neutral",
+        "displayName": "Borde fuerte",
+        "canonical": "#b3c0b6",
+        "oklch": "oklch(79.5% 0.020 152.7)",
+        "tonalRamp": [
+          "oklch(15% 0.020 152.7)",
+          "oklch(26% 0.020 152.7)",
+          "oklch(38% 0.020 152.7)",
+          "oklch(49% 0.020 152.7)",
+          "oklch(61% 0.020 152.7)",
+          "oklch(72% 0.020 152.7)",
+          "oklch(84% 0.020 152.7)",
+          "oklch(95% 0.020 152.7)"
+        ]
+      },
+      "borde-control": {
+        "role": "neutral",
+        "displayName": "Borde de control",
+        "canonical": "#7f8f84",
+        "oklch": "oklch(63.4% 0.025 155.6)",
+        "tonalRamp": [
+          "oklch(15% 0.025 155.6)",
+          "oklch(26% 0.025 155.6)",
+          "oklch(38% 0.025 155.6)",
+          "oklch(49% 0.025 155.6)",
+          "oklch(61% 0.025 155.6)",
+          "oklch(72% 0.025 155.6)",
+          "oklch(84% 0.025 155.6)",
+          "oklch(95% 0.025 155.6)"
+        ]
+      },
+      "texto": {
+        "role": "neutral",
+        "displayName": "Texto",
+        "canonical": "#1b2420",
+        "oklch": "oklch(25.0% 0.015 166.3)",
+        "tonalRamp": [
+          "oklch(15% 0.015 166.3)",
+          "oklch(26% 0.015 166.3)",
+          "oklch(38% 0.015 166.3)",
+          "oklch(49% 0.015 166.3)",
+          "oklch(61% 0.015 166.3)",
+          "oklch(72% 0.015 166.3)",
+          "oklch(84% 0.015 166.3)",
+          "oklch(95% 0.015 166.3)"
+        ]
+      },
+      "suave": {
+        "role": "neutral",
+        "displayName": "Suave",
+        "canonical": "#566159",
+        "oklch": "oklch(48.1% 0.019 154.1)",
+        "tonalRamp": [
+          "oklch(15% 0.019 154.1)",
+          "oklch(26% 0.019 154.1)",
+          "oklch(38% 0.019 154.1)",
+          "oklch(49% 0.019 154.1)",
+          "oklch(61% 0.019 154.1)",
+          "oklch(72% 0.019 154.1)",
+          "oklch(84% 0.019 154.1)",
+          "oklch(95% 0.019 154.1)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Título de vista",
+        "purpose": "Título de cada vista; en Hoy, la fecha larga. 1.424rem a 900 px o menos."
+      },
+      "hora": {
+        "displayName": "Hora actual",
+        "purpose": "La hora de la PC a la derecha del título de Hoy, en suave con ícono de reloj. 1.125rem a 520 px o menos."
+      },
+      "title": {
+        "displayName": "Título de bloque",
+        "purpose": "Títulos de formularios en línea y del estado vacío grande."
+      },
+      "body-fila": {
+        "displayName": "Fila",
+        "purpose": "Nombre de la persona y horas en la planilla de Hoy; nombre del colegio en la barra (650)."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Base del documento (0.889rem), botones (600), campos y celdas. Ayudas y alertas a 75ch."
+      },
+      "label": {
+        "displayName": "Etiqueta",
+        "purpose": "Etiquetas de campo, encabezados de planilla, chips, PIN bajo el nombre, horas de la escala (500), pies y estado del reloj."
+      }
+    },
+    "typeScale": {
+      "ratio": 1.125,
+      "steps": {
+        "t-2": "0.79rem",
+        "t-1": "0.889rem",
+        "t0": "1rem",
+        "t1": "1.125rem",
+        "t2": "1.266rem",
+        "t3": "1.424rem",
+        "t4": "1.602rem"
+      },
+      "weights": [
+        400,
+        500,
+        550,
+        600,
+        650,
+        700
+      ],
+      "numeric": "font-variant-numeric: tabular-nums en body (todo el documento)"
+    },
+    "shadows": [
+      {
+        "name": "nav-actual",
+        "value": "inset 0 -2px 0 var(--tiza)",
+        "purpose": "Subrayado del ítem de navegación actual en la barra (inset 0 -3px 0 en 900 px o menos). Única sombra del sistema; no hay sombras proyectadas."
+      },
+      {
+        "name": "halo-tick",
+        "value": "outline: 1.5px solid var(--superficie)",
+        "purpose": "Halo que despega los ticks de marcaciones intermedias del tramo de La jornada (outline, no sombra)."
+      }
+    ],
+    "focus": [
+      {
+        "name": "foco",
+        "value": "outline: 2px solid var(--tinta); outline-offset: 2px",
+        "purpose": "Foco visible en toda la interfaz."
+      },
+      {
+        "name": "foco-campo",
+        "value": "outline: 2px solid var(--tinta); outline-offset: 0; border-color: var(--tinta)",
+        "purpose": "Foco de inputs y selects."
+      },
+      {
+        "name": "foco-barra",
+        "value": "outline-color: var(--tinta-clara)",
+        "purpose": "Foco sobre el pizarrón."
+      },
+      {
+        "name": "foco-invalido",
+        "value": "outline-color: var(--rojo); border-color: var(--rojo)",
+        "purpose": "Campo :user-invalid."
+      }
+    ],
+    "motion": [
+      {
+        "name": "salida",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Ease-out exponencial: entintado, chevron del plegable, enlace Saltar al contenido."
+      },
+      {
+        "name": "hover",
+        "value": "0.15s (background-color, border-color, color)",
+        "purpose": "Cambios de color en botones, campos, navegación y segmentos."
+      },
+      {
+        "name": "presion",
+        "value": "transform 0.1s; translateY(1px)",
+        "purpose": "Botón presionado."
+      },
+      {
+        "name": "entintado",
+        "value": "entintar 1.2s var(--salida) both; from background-color var(--tinta-fill) to transparent",
+        "purpose": "Lo que cambió con el refresco: celda de hora de la fila, dato de Última marcación, número del segmento."
+      },
+      {
+        "name": "respira",
+        "value": "respira 2.4s ease-in-out infinite; opacity 0 → 0.7 → 0",
+        "purpose": "Últimos 10 px del tramo abierto (persona aún en el colegio)."
+      },
+      {
+        "name": "chevron",
+        "value": "transform 0.2s var(--salida); rotate(90deg)",
+        "purpose": "Plegable Últimos comandos."
+      },
+      {
+        "name": "girar",
+        "value": "girar 0.8s linear infinite",
+        "purpose": "Aro de carga de botones (1.8s con movimiento reducido)."
+      },
+      {
+        "name": "indicador",
+        "value": "opacity 0.2s ease-out 0.15s",
+        "purpose": "Texto 'actualizando…' de htmx, con demora para no parpadear."
+      },
+      {
+        "name": "reducido",
+        "value": "@media (prefers-reduced-motion: reduce)",
+        "purpose": "Sin entintado ni respiración (solo estado final), aro más lento, transiciones a 0.01ms."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "ancho",
+        "value": "1360px",
+        "purpose": "Ancho máximo del contenedor (--ancho)."
+      },
+      {
+        "name": "tablet",
+        "value": "max-width: 1100px",
+        "purpose": "Gutter 24 px; columnas de Hoy reajustadas."
+      },
+      {
+        "name": "angosta",
+        "value": "max-width: 900px",
+        "purpose": "Gutter 16 px, controles de 44 px, barra partida, segmentos 2x2, filas de Hoy y Marcaciones apiladas."
+      },
+      {
+        "name": "movil",
+        "value": "max-width: 520px",
+        "purpose": "Navegación sin íconos; reloj en dos renglones."
+      }
+    ],
+    "sizes": {
+      "control": "40px (44px a 900 px o menos)",
+      "control-chico": "32px",
+      "barra": "68px",
+      "disco-logo": "44px (40px móvil)",
+      "icono": "20px (16px en botón chico, 32px en estado vacío)",
+      "punto": "8px",
+      "tramo": "10px de alto, mínimo 6px de ancho",
+      "tick": "2px x 20px",
+      "linea-ahora": "1.5px"
+    },
+    "iconography": {
+      "source": "app/static/iconos.svg (sprite propio)",
+      "grid": "24x24",
+      "stroke": "1.5px, round caps y joins, fill none, currentColor",
+      "set": [
+        "hoy",
+        "marcaciones",
+        "empleados",
+        "config",
+        "buscar",
+        "excel",
+        "reloj",
+        "mas",
+        "editar",
+        "basura",
+        "x",
+        "imagen",
+        "alerta",
+        "check",
+        "info",
+        "chevron",
+        "subir"
+      ],
+      "appIcon": "app/static/icono.svg: círculo pizarrón (#1d3a33) con agujas de reloj en tiza (#eef2ec), trazo 2.5"
+    },
+    "signature": {
+      "name": "La jornada",
+      "scale": "07:00 a 19:00; etiquetas cada 2 h (07, 09 … 19) en el encabezado; regla con 12 marcas horarias en borde-fuerte por fila",
+      "tramo": "verde (en el colegio) o pizarra-estado (se retiró); 10px, radio 3px; abierto: termina en 'ahora', extremo recto y últimos 10px respiran",
+      "recorte": "punta de flecha de 7px (clip-path) en el extremo que excede la escala",
+      "ticks": "marcaciones intermedias: 2x20px en texto con halo de superficie",
+      "ahora": "línea vertical 1.5px en tinta que cruza todas las filas + triángulo de 9x6px en tinta bajo las horas; oculta fuera de la escala",
+      "accesibilidad": "franja aria-hidden; la información está en Estado, Entrada, Salida y Horas",
+      "entintado": "relleno tinta al 28% que se desvanece en 1.2s (ease-out exponencial) sobre la celda de hora que cambió, el dato de Última marcación y el número del segmento que cambió"
+    },
+    "excel": {
+      "source": "app/reports.py (openpyxl)",
+      "sheets": [
+        "Resumen por día (primera y activa)",
+        "Detalle",
+        "Info"
+      ],
+      "palette": {
+        "verde": "#1D3A33",
+        "texto": "#1B2420",
+        "suave": "#59655F",
+        "cebra": "#F3F6F2",
+        "borde": "#DDE3DD",
+        "ambar-fondo": "#FBEFD5",
+        "ambar-texto": "#7A4A00",
+        "tipo-entrada": "#1F7A4A",
+        "tipo-salida": "#4A5A68",
+        "tipo-intermedia": "#1B2420",
+        "tipo-repetida": "#6B756F (cursiva)"
+      },
+      "header": "Filas 1-3: logo PNG/JPG máx. 150x52 px en A-B (SVG no se inserta); colegio 16pt negrita verde (fila 26pt); 'Asistencia del personal' 12pt negrita suave (19pt); período · empleado · emisión 10pt suave (17pt). Fila 4 de 8pt.",
+      "titles": "Fila 5 (24pt): fondo verde, texto blanco negrita; centradas fecha/hora/PIN/cantidades, resto a la izquierda con sangría 1; paneles congelados y autofiltro",
+      "rows": "Cebra en filas alternas, borde inferior fino, sin cuadrícula; Tipo con su color",
+      "observacion": "Alerta: fondo y texto ámbar con ajuste de texto. Informativa (Sin salida todavía): suave en cursiva",
+      "total": "Negrita, borde superior medio en verde; luego notas de cálculo en cursiva suave",
+      "print": "A4 horizontal, 1 página de ancho, títulos repetidos (fila 5), centrado horizontal, márgenes 0.4/0.6 in, pie 'Página &P de &N' 9pt suave"
+    }
+  },
+  "components": [
+    {
+      "name": "Botón primario",
+      "kind": "button",
+      "refersTo": "button-primario",
+      "description": "La acción principal de la vista (Exportar a Excel, Agregar empleado, Guardar). Uno por vista.",
+      "html": "<button class=\"ds-btn ds-btn-primario\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"4\" y=\"3.5\" width=\"16\" height=\"17\" rx=\"2\"/><path d=\"M4 9.5h16M4 15h16M10 9.5v11\"/></svg><span>Exportar a Excel</span></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s; } .ds-ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn:active { transform: translateY(1px); } .ds-btn-primario { background: #2747b8; border-color: #2747b8; color: #fff; } .ds-btn-primario:hover { background: #1f3a99; border-color: #1f3a99; } .ds-btn-primario:active { background: #182e7a; border-color: #182e7a; }"
+    },
+    {
+      "name": "Botón",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Acción secundaria con contorno (Filtrar, Editar).",
+      "html": "<button class=\"ds-btn\">Filtrar</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, transform 0.1s; } .ds-btn:hover { background: #edf1ed; border-color: #5f7166; } .ds-btn:active { background: #e1e8e2; transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
+    },
+    {
+      "name": "Botón de peligro (chico)",
+      "kind": "button",
+      "refersTo": "button-peligro",
+      "description": "Acción destructiva por fila: neutra en reposo, roja solo al apuntarla o enfocarla; siempre confirma.",
+      "html": "<button class=\"ds-btn ds-btn-chico ds-btn-peligro\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5\"/></svg><span>Dar de baja</span></button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s; } .ds-btn-chico { height: 32px; padding: 0 10px; gap: 6px; font-size: 0.79rem; } .ds-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn-peligro:hover, .ds-btn-peligro:focus-visible { background: #fdeceb; border-color: #b42318; color: #b42318; } .ds-btn-peligro:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn-peligro:active { background: #f9d9d6; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo con etiqueta encima; foco en tinta, inválido en rojo.",
+      "html": "<label class=\"ds-label\">Nombre <input class=\"ds-input\" type=\"text\" placeholder=\"Hasta 24 caracteres\"></label>",
+      "css": ".ds-label { display: inline-flex; flex-direction: column; gap: 4px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.79rem; font-weight: 600; color: #566159; } .ds-input { height: 40px; padding: 0 12px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font: inherit; font-size: 0.889rem; font-weight: 400; transition: border-color 0.15s; } .ds-input::placeholder { color: #6b756f; } .ds-input:hover { border-color: #5f7166; } .ds-input:focus-visible { outline: 2px solid #2747b8; outline-offset: 0; border-color: #2747b8; } .ds-input:user-invalid { border-color: #b42318; }"
+    },
+    {
+      "name": "Navegación (barra pizarrón)",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Barra superior en verde pizarrón con ítems en tiza; el actual lleva subrayado inserto.",
+      "html": "<nav class=\"ds-barra\"><a class=\"ds-nav\" href=\"#\" aria-current=\"page\">Hoy</a><a class=\"ds-nav\" href=\"#\">Marcaciones</a><a class=\"ds-nav\" href=\"#\">Empleados</a><span class=\"ds-reloj\"><span class=\"ds-punto\"></span><b>Reloj conectado</b> · hace 3 s</span></nav>",
+      "css": ".ds-barra { display: flex; align-items: center; gap: 4px; min-height: 68px; padding: 0 24px; background: #1d3a33; color: #eef2ec; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; } .ds-nav { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; color: #b9cbc1; font-weight: 550; text-decoration: none; transition: background-color 0.15s, color 0.15s; } .ds-nav:hover { background: rgb(238 242 236 / 0.1); color: #eef2ec; } .ds-nav:active { background: rgb(238 242 236 / 0.18); } .ds-nav:focus-visible { outline: 2px solid #aebdf5; outline-offset: 2px; } .ds-nav[aria-current=\"page\"] { background: rgb(238 242 236 / 0.16); color: #fff; font-weight: 650; box-shadow: inset 0 -2px 0 #eef2ec; } .ds-reloj { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #b9cbc1; font-size: 0.79rem; } .ds-reloj b { color: #eef2ec; font-weight: 600; } .ds-punto { width: 8px; height: 8px; border-radius: 50%; background: #6fd49b; }"
+    },
+    {
+      "name": "Chip de estado",
+      "kind": "chip",
+      "refersTo": "chip-estado",
+      "description": "Estado de asistencia: punto + palabra, nunca solo color.",
+      "html": "<span class=\"ds-chip ds-verde\"><span class=\"ds-punto\"></span>En el colegio</span> <span class=\"ds-chip ds-pizarra\"><span class=\"ds-punto\"></span>Se retiró</span> <span class=\"ds-chip ds-ambar\"><span class=\"ds-punto\"></span>Sin marcar</span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px 0 9px; border: 1px solid color-mix(in srgb, currentColor 30%, #fff); border-radius: 13px; background: #fff; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.79rem; font-weight: 650; line-height: 1; white-space: nowrap; } .ds-punto { width: 8px; height: 8px; border-radius: 50%; background: currentColor; } .ds-verde { color: #1f7a4a; } .ds-pizarra { color: #4a5a68; } .ds-ambar { color: #a5650a; }"
+    },
+    {
+      "name": "Control segmentado (resumen y filtro)",
+      "kind": "custom",
+      "refersTo": "segmentos",
+      "description": "El resumen del día que también filtra la planilla de Hoy.",
+      "html": "<div class=\"ds-seg\" role=\"group\"><button class=\"ds-s\" aria-pressed=\"true\">Todos <b>42</b></button><button class=\"ds-s\"><i style=\"background:#1f7a4a\"></i>En el colegio <b>30</b></button><button class=\"ds-s\"><i style=\"background:#4a5a68\"></i>Se retiraron <b>4</b></button><button class=\"ds-s\"><i style=\"background:#a5650a\"></i>Sin marcar <b>8</b></button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; background: #edf1ed; border: 1px solid #d6ded7; border-radius: 10px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-s { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #566159; font: inherit; font-size: 0.889rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-s i { width: 8px; height: 8px; border-radius: 50%; } .ds-s b { color: #1b2420; font-weight: 700; } .ds-s:hover { background: rgb(255 255 255 / 0.7); color: #1b2420; } .ds-s[aria-pressed=\"true\"] { background: #fff; border-color: #b3c0b6; color: #1b2420; } .ds-s:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
+    },
+    {
+      "name": "La jornada (fila de Hoy)",
+      "kind": "custom",
+      "refersTo": "tramo",
+      "description": "Firma del sistema: franja horaria 07:00-19:00 por persona, con tramo, tick intermedio, línea 'ahora' y el tramo abierto que respira.",
+      "html": "<div class=\"ds-fila\"><span class=\"ds-nombre\">Ana Pérez<small>PIN 12</small></span><span class=\"ds-hora ds-entintado\">07:42</span><div class=\"ds-franja\" style=\"--ahora: 52%\"><span class=\"ds-tramo ds-abierto\" style=\"left: 6%; width: 46%\"></span><span class=\"ds-tick\" style=\"left: 30%\"></span></div></div>",
+      "css": ".ds-fila { display: grid; grid-template-columns: 160px 70px 1fr; align-items: center; height: 48px; padding: 0 14px; background: #fff; border: 1px solid #d6ded7; border-radius: 12px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #1b2420; } .ds-nombre { font-size: 1rem; font-weight: 600; line-height: 1.25; } .ds-nombre small { display: block; color: #566159; font-size: 0.79rem; font-weight: 400; } .ds-hora { justify-self: start; padding: 2px 6px; border-radius: 6px; font-size: 1rem; } .ds-entintado { animation: ds-entintar 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate; } @keyframes ds-entintar { from { background-color: rgb(39 71 184 / 0.28); } to { background-color: transparent; } } .ds-franja { position: relative; height: 100%; background: linear-gradient(#b3c0b6, #b3c0b6) center / 100% 1px no-repeat, linear-gradient(90deg, #b3c0b6 1px, transparent 1px) left center / calc((100% - 1px) / 12) 7px repeat-x; } .ds-franja::after { content: \"\"; position: absolute; left: var(--ahora); top: 0; bottom: 0; width: 1.5px; background: #2747b8; } .ds-tramo { position: absolute; top: 50%; height: 10px; min-width: 6px; translate: 0 -50%; border-radius: 3px; background: #1f7a4a; } .ds-abierto { border-radius: 3px 0 0 3px; } .ds-abierto::after { content: \"\"; position: absolute; inset: 0 0 0 auto; width: 10px; background: #fff; opacity: 0; animation: ds-respira 2.4s ease-in-out infinite; } @keyframes ds-respira { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } } .ds-tick { position: absolute; top: 50%; width: 2px; height: 20px; margin-left: -1px; translate: 0 -50%; border-radius: 1px; background: #1b2420; outline: 1.5px solid #fff; } @media (prefers-reduced-motion: reduce) { .ds-entintado, .ds-abierto::after { animation: none; } }"
+    },
+    {
+      "name": "Alerta",
+      "kind": "card",
+      "refersTo": "formulario-en-linea",
+      "description": "Aviso en caja de 8 px con ícono de color y texto neutro (variantes OK, aviso, error).",
+      "html": "<p class=\"ds-alerta ds-aviso\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3.5L2.5 20h19L12 3.5zM12 10v4.5M12 17.2h.01\"/></svg><span>Se muestran solo las marcaciones más nuevas; hay más. Acotá el rango de fechas.</span></p>",
+      "css": ".ds-alerta { display: flex; align-items: flex-start; gap: 10px; max-width: 75ch; margin: 0; padding: 12px 14px; border: 1px solid #b3c0b6; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; line-height: 1.5; } .ds-ico { width: 20px; height: 20px; flex: none; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-aviso { background: #fbf3e3; border-color: #e3cf9f; } .ds-aviso .ds-ico { color: #a5650a; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El libro de asistencia hecho pantalla",
+    "overview": "El panel es el libro de asistencia del personal de un colegio argentino, no un dashboard. La jornada de hoy se lee como una franja horaria por persona sobre la escala de 07:00 a 19:00, en una planilla densa y alineada, como la hoja de un libro de firmas. El mundo escolar entra solo por cuatro vías: la paleta (barra en verde pizarrón con texto tiza, tinta de birome azul para todo lo que se puede tocar), la densidad de planilla, el lenguaje de escuela y una firma, \"La jornada\". Nada de ilustraciones, texturas de pizarrón ni tipografías \"manuscritas\".\n\nLa superficie de trabajo es clara (oficina con luz diurna, tema claro único) y plana: blanco frío apenas verdoso, tarjetas y planillas blancas con un borde fino, sin sombras. La profundidad la da el contraste de tono, no la elevación. El color de estado (verde, pizarra, ámbar, rojo) siempre acompaña a un texto; nunca comunica solo. Una única familia del sistema, escala 1.125 y números tabulares en todas partes, porque la materia prima son horas y cantidades.\n\nEl Excel exportado es el mismo mundo trasladado al papel: encabezado de documento con logo y nombre del colegio, fila de títulos en verde pizarrón, cebra muy suave y listo para imprimir. Rechazos confirmados por la dirección: el dashboard genérico de tarjetas con números grandes y la tabla gris con un acento azul.",
+    "keyCharacteristics": [
+      "Shell verde pizarrón + texto tiza; trabajo sobre blanco frío; tinta azul solo para interacción.",
+      "Planilla densa (filas de 46-48 px), columnas estrictas, números tabulares.",
+      "Estado = punto o color + texto, siempre.",
+      "Plano: bordes finos de 1 px y tono; cero sombras proyectadas.",
+      "Una firma: \"La jornada\" (franja horaria por persona) y su gesto vivo, el entintado.",
+      "Movimiento mínimo, ease-out exponencial, con alternativa completa para movimiento reducido."
+    ],
+    "rules": [
+      {
+        "name": "The Tinta Rule",
+        "body": "El azul de birome significa \"esto se toca\" (o \"ahora\"). No se usa como decoración, fondo de sección ni color de estado de asistencia.",
+        "section": "colors"
+      },
+      {
+        "name": "The Texto Más Color Rule",
+        "body": "Ningún estado se comunica solo con color: el chip lleva punto y palabra, el reloj lleva punto y frase, la repetida además se marca con borde punteado y cursiva.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pizarrón Es Marco Rule",
+        "body": "El verde pizarrón pertenece a la barra, al ícono y a la fila de títulos del Excel. Dentro del área de trabajo no aparecen fondos oscuros.",
+        "section": "colors"
+      },
+      {
+        "name": "The Una Familia Rule",
+        "body": "Una sola familia, la del sistema. La jerarquía se arma con la escala 1.125 y el peso; no se agrega una segunda fuente ni se descarga ninguna.",
+        "section": "typography"
+      },
+      {
+        "name": "The Número Tabular Rule",
+        "body": "Toda hora, cantidad y PIN se compone con cifras tabulares para que las columnas queden alineadas al dígito.",
+        "section": "typography"
+      },
+      {
+        "name": "The Plano Por Defecto Rule",
+        "body": "Nada flota. Una tarjeta, una planilla o un aviso se distinguen por borde y tono, nunca por sombra. El hover cambia el fondo, no la altura.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar la tinta (#2747b8) solo para acciones, enlaces, foco, selección y \"ahora\".",
+      "Do acompañar cada color de estado con su palabra (punto + \"En el colegio\", \"Se retiró\", \"Sin marcar\"; \"Reloj conectado · hace 3 s\").",
+      "Do componer horas, cantidades y PIN con cifras tabulares y alinearlos en columna.",
+      "Do mantener la densidad de planilla: filas de 46-48 px, celdas con 14 px de relleno.",
+      "Do separar superficies con borde de 1 px y tono; radios de 8 px en controles y 12 px en contenedores.",
+      "Do dibujar íconos nuevos en el sprite propio: 24 x 24, trazo de 1.5 px, redondeados, sin relleno.",
+      "Do dar a cada animación su alternativa de movimiento reducido (estado final sin animar).",
+      "Do usar ease-out exponencial (`cubic-bezier(0.16, 1, 0.3, 1)`) para lo que aparece y 0.15 s para cambios de color de hover.",
+      "Do dejar las acciones destructivas neutras en reposo y pedir confirmación.",
+      "Do mostrar el estado vacío \"Cargá el nombre y el logo del colegio\" cuando falten."
+    ],
+    "donts": [
+      "Don't armar un dashboard de tarjetas con números grandes ni una tabla gris con un acento azul: la jornada se lee como franja por persona.",
+      "Don't usar sombras proyectadas; la única sombra permitida es el subrayado inserto del ítem de navegación actual.",
+      "Don't usar fondos oscuros dentro del área de trabajo: el pizarrón es solo el marco.",
+      "Don't cargar fuentes, íconos ni scripts desde un CDN; todo es local.",
+      "Don't poner formularios en modales: el alta y la edición van en línea.",
+      "Don't inventar nombre ni logo del colegio.",
+      "Don't pintar en rojo una acción destructiva en reposo."
+    ]
+  }
+}
