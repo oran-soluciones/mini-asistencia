@@ -2,21 +2,21 @@
 name: mini-asistencia
 description: El libro de asistencia del personal del colegio, hecho pantalla. Panel local + Excel.
 colors:
-  pizarra: "#1d3a33"
-  tiza: "#eef2ec"
-  tiza-suave: "#b9cbc1"
-  fondo: "#f5f7f4"
+  pizarra: "#262626"
+  tiza: "#f2f2f2"
+  tiza-suave: "#bdbdbd"
+  fondo: "#f5f5f5"
   superficie: "#ffffff"
-  superficie-2: "#edf1ed"
-  superficie-presionada: "#e1e8e2"
-  fila-hover: "#f9fbf8"
-  borde: "#d6ded7"
-  borde-fuerte: "#b3c0b6"
-  borde-control: "#7f8f84"
-  borde-control-hover: "#5f7166"
-  texto: "#1b2420"
-  suave: "#566159"
-  placeholder: "#6b756f"
+  superficie-2: "#eeeeee"
+  superficie-presionada: "#e3e3e3"
+  fila-hover: "#fafafa"
+  borde: "#d9d9d9"
+  borde-fuerte: "#b8b8b8"
+  borde-control: "#878787"
+  borde-control-hover: "#666666"
+  texto: "#1f1f1f"
+  suave: "#5c5c5c"
+  placeholder: "#707070"
   tinta: "#2747b8"
   tinta-hover: "#1f3a99"
   tinta-activa: "#182e7a"
@@ -36,7 +36,7 @@ colors:
   rojo-borde: "#dca29c"
   reloj-conectado: "#6fd49b"
   reloj-sin-contacto: "#f2b84b"
-  reloj-nunca: "#8fa398"
+  reloj-nunca: "#9e9e9e"
 typography:
   headline:
     fontFamily: "Segoe UI Variable Text, Segoe UI Variable, Segoe UI, system-ui, -apple-system, Roboto, Helvetica Neue, Arial, sans-serif"
@@ -147,7 +147,7 @@ components:
     padding: "0 14px"
     height: "40px"
   nav-item-actual:
-    backgroundColor: "rgb(238 242 236 / 0.16)"
+    backgroundColor: "rgb(242 242 242 / 0.16)"
     textColor: "{colors.superficie}"
   segmentos:
     backgroundColor: "{colors.superficie-2}"
@@ -208,23 +208,23 @@ components:
 El panel es el libro de asistencia del personal de un colegio argentino, no un dashboard. La
 jornada de hoy se lee como una franja horaria por persona sobre la escala de 07:00 a 19:00, en una
 planilla densa y alineada, como la hoja de un libro de firmas. El mundo escolar entra solo por
-cuatro vías: la paleta (barra en verde pizarrón con texto tiza, tinta de birome azul para todo lo
+cuatro vías: la paleta (barra en negro suave con texto tiza, tinta de birome azul para todo lo
 que se puede tocar), la densidad de planilla, el lenguaje de escuela y una firma, "La jornada".
 Nada de ilustraciones, texturas de pizarrón ni tipografías "manuscritas".
 
 La superficie de trabajo es clara (oficina con luz diurna, tema claro único) y plana: blanco frío
-apenas verdoso, tarjetas y planillas blancas con un borde fino, sin sombras. La profundidad la da
+neutro, tarjetas y planillas blancas con un borde fino, sin sombras. La profundidad la da
 el contraste de tono, no la elevación. El color de estado (verde, pizarra, ámbar, rojo) siempre
 acompaña a un texto; nunca comunica solo. Una única familia del sistema, escala 1.125 y números
 tabulares en todas partes, porque la materia prima son horas y cantidades.
 
 El Excel exportado es el mismo mundo trasladado al papel: encabezado de documento con logo y
-nombre del colegio, fila de títulos en verde pizarrón, cebra muy suave y listo para imprimir.
+nombre del colegio, fila de títulos en negro suave, cebra muy suave y listo para imprimir.
 Rechazos confirmados por la dirección: el dashboard genérico de tarjetas con números grandes y la
 tabla gris con un acento azul.
 
 **Key Characteristics:**
-- Shell verde pizarrón + texto tiza; trabajo sobre blanco frío; tinta azul solo para interacción.
+- Shell negro suave + texto tiza; trabajo sobre blanco frío; tinta azul solo para interacción.
 - Planilla densa (filas de 46-48 px), columnas estrictas, números tabulares.
 - Estado = punto o color + texto, siempre.
 - Plano: bordes finos de 1 px y tono; cero sombras proyectadas.
@@ -233,7 +233,7 @@ tabla gris con un acento azul.
 
 ## Colors
 
-Una paleta de escuela: verde pizarrón y tiza para el marco, tinta de birome para la acción, y
+Una paleta de escuela: negro suave y tiza para el marco, tinta de birome para la acción, y
 cuatro colores de estado que nunca aparecen sin su palabra.
 
 ### Primary
@@ -245,7 +245,7 @@ cuatro colores de estado que nunca aparecen sin su palabra.
   plegable "Últimos comandos" (10 %); relleno inicial del entintado (28 %).
 
 ### Secondary
-- **Verde pizarrón** (pizarra): la barra superior, la vista previa de la barra en Configuración,
+- **Negro suave** (pizarra, al tono del logo del colegio): la barra superior, la vista previa de la barra en Configuración,
   el ícono de la app y la fila de títulos del Excel. Es el marco, nunca un botón.
 - **Tiza** (tiza): texto sobre el pizarrón (10.9:1), subrayado del ítem de navegación actual, fondo
   del disco del logo y del enlace "Saltar al contenido". **Tiza suave** (tiza-suave, 7.3:1 sobre
@@ -261,7 +261,7 @@ cuatro colores de estado que nunca aparecen sin su palabra.
 - **Rojo de peligro** (rojo): errores, campo inválido y el estado hover/foco de las acciones
   destructivas (con rojo-fondo, rojo-borde y rojo-presionado).
 - **Puntos del reloj** (reloj-conectado, reloj-sin-contacto, reloj-nunca): versiones claras del
-  verde, el ámbar y un gris verdoso, porque viven sobre el pizarrón; siempre junto al texto
+  verde, el ámbar y un gris neutro, porque viven sobre el pizarrón; siempre junto al texto
   "Reloj conectado / sin contacto / Todavía no se conectó ningún reloj".
 
 ### Neutral
@@ -284,7 +284,7 @@ decoración, fondo de sección ni color de estado de asistencia.
 **The Texto Más Color Rule.** Ningún estado se comunica solo con color: el chip lleva punto y
 palabra, el reloj lleva punto y frase, la repetida además se marca con borde punteado y cursiva.
 
-**The Pizarrón Es Marco Rule.** El verde pizarrón pertenece a la barra, al ícono y a la fila de
+**The Pizarrón Es Marco Rule.** El negro suave pertenece a la barra, al ícono y a la fila de
 títulos del Excel. Dentro del área de trabajo no aparecen fondos oscuros.
 
 ## Typography
@@ -350,8 +350,7 @@ Responsive:
 Sistema plano. No hay ninguna sombra proyectada: la profundidad se arma con tono (fondo blanco
 frío, superficies blancas, encabezados en superficie-2) y bordes de 1 px. Los únicos `box-shadow`
 son indicadores insertos: el subrayado tiza del ítem de navegación actual (`inset 0 -2px 0`, o
-`-3px` en móvil). Los ticks de La jornada llevan un halo de 1.5 px del color de la superficie
-(`outline`) para despegarse del tramo, no una sombra.
+`-3px` en móvil).
 
 ### Named Rules
 **The Plano Por Defecto Rule.** Nada flota. Una tarjeta, una planilla o un aviso se distinguen por
@@ -396,8 +395,9 @@ Sobrios y táctiles: blancos con contorno, la tinta reservada para la acción pr
   ambar (Sin marcar).
 - **Comandos al reloj:** misma píldora, 24 px de línea, primera letra en mayúscula: pendiente en
   ámbar, enviado en tinta, ok en verde, error en rojo.
-- **Tipo de marcación:** píldora de 24 px. Entrada verde, Salida pizarra, Intermedia en texto,
-  Repetida en suave con borde punteado y peso 550 (y su fila entera en suave).
+- **Tipo de marcación:** píldora de 24 px. Entrada verde, Salida pizarra, Repetida en suave con
+  borde punteado y peso 550 (y su fila entera en suave), Anulada en rojo con borde punteado (fila
+  en suave y hora tachada; botón "Restaurar" en lugar de "Anular").
 
 ### Control segmentado (resumen y filtro de Hoy)
 El resumen del día es a la vez el filtro: "Todos 42 · En el colegio 30 · Se retiraron 4 · Sin
@@ -449,15 +449,15 @@ Siempre decorativos (`aria-hidden`) junto a un texto.
 
 ### La jornada (firma)
 Cada fila de Hoy tiene una franja horizontal sobre la escala de 07:00 a 19:00.
-- **Escala:** en el encabezado, el título "La jornada" y las horas impares (07, 09 … 19) en label
-  suave a 500. Debajo de cada fila, una regla de borde-fuerte con una marca por hora (12 tramos).
-- **Tramo:** barra de 10 px y 3 px de radio, de la entrada a la salida, en verde; en pizarra-estado
+- **Escala:** el encabezado de la columna dice solo "Horarios" (sin números ni marcas). En cada
+  fila, una regla de borde-fuerte con una marquita por hora (12 tramos) y, arriba de cada marquita,
+  la hora en números chiquitos (07, 08, 09 … 19; 0.6rem, suave, 500).
+- **Tramo:** un tramo por cada par entrada-salida (si salió y volvió, se ve el hueco). Barra de
+  10 px y 3 px de radio, de la entrada a la salida, en verde; en pizarra-estado
   si la persona se retiró. Ancho mínimo de 6 px. Si sigue en el colegio, el tramo termina
   exactamente en "ahora" con el extremo recto y sus últimos 10 px "respiran" (se aclaran hasta 70 %
   y vuelven, 2.4 s, ease-in-out, en bucle).
-- **Ticks:** cada marcación intermedia es una raya de 2 x 20 px en texto con halo de superficie.
-- **Ahora:** una línea vertical de 1.5 px en tinta cruza todas las filas; en el encabezado nace de
-  un triángulo de tinta bajo las horas. Fuera del horario de la escala, no se dibuja.
+- **Ahora:** una línea vertical de 1.5 px en tinta cruza todas las filas. Fuera del horario de la escala, no se dibuja.
 - **Recorte:** si la jornada empieza antes de las 07:00 o termina después de las 19:00, el extremo
   recortado termina en punta.
 - La franja es decorativa para lectores de pantalla (`aria-hidden`): la misma información está en
@@ -474,16 +474,16 @@ cambió. Con `prefers-reduced-motion` no hay entintado ni respiración: solo el 
 El documento del colegio en papel. Hojas: "Resumen por día" (primera y activa), "Detalle" e
 "Info".
 - **Encabezado de documento** (filas 1 a 3): logo PNG/JPG (máx. 150 x 52 px, columnas A-B; el SVG no
-  se inserta), nombre del colegio (16 pt, negrita, verde pizarrón), "Asistencia del personal"
+  se inserta), nombre del colegio (16 pt, negrita, negro suave), "Asistencia del personal"
   (12 pt, negrita, suave) y período · empleado · fecha de emisión (10 pt, suave). Fila 4 de aire.
-- **Títulos** (fila 5, 24 pt de alto): fondo verde pizarrón, texto blanco en negrita; columnas de
+- **Títulos** (fila 5, 24 pt de alto): fondo negro suave, texto blanco en negrita; columnas de
   fecha, hora, PIN y cantidades centradas, el resto a la izquierda con sangría 1. Paneles
   congelados y autofiltro.
 - **Filas:** cebra muy suave en filas alternas, línea inferior fina, sin cuadrícula. El Tipo lleva
   su color de estado (Repetida en cursiva).
 - **Observación:** en ámbar (fondo y texto) solo si es una alerta; "Sin salida todavía" (hoy, a media
   jornada) va en suave y cursiva.
-- **Total:** negrita con línea superior media en verde pizarrón; debajo, las notas de cálculo en
+- **Total:** negrita con línea superior media en negro suave; debajo, las notas de cálculo en
   cursiva suave.
 - **Impresión:** A4 horizontal, 1 página de ancho, títulos repetidos, centrado, pie "Página N de M"
   en 9 pt suave.

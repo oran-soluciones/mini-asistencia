@@ -73,7 +73,7 @@ def test_hoy_la_jornada_posiciones_y_linea_ahora(client, db_path):
   assert 'class="tramo abierto"' in beto and "left: 4.167%; width: 37.5%" in beto  # 07:30 -> ahora
   ana = re.search(r'<tr class="fila"[^>]*data-pin="2".*?</tr>', html, re.S).group(0)
   assert "tramo" not in ana
-  assert html.count('class="marca-hora"') == 7 and ">07<" in html and ">19<" in html
+  assert zoe.count('class="marca-hora"') == 13 and '>07</span>' in zoe and '>19</span>' in zoe
 
 
 def test_hoy_fuera_de_horario_no_dibuja_la_linea_ahora(client, db_path, monkeypatch):
@@ -199,4 +199,41 @@ def test_la_franja_abierta_ya_no_dibuja_un_recuadro_ni_cruza_la_linea_ahora(clie
   assert "@keyframes respira" in css
   assert re.search(r"\.franja::after \{[^}]*width: 1\.5px[^}]*background: var\(--tinta\)", css)
   assert not re.search(r"\.franja::after \{[^}]*opacity", css)
-  assert ".escala-ahora::after" in css  # la línea sigue dentro del encabezado
+
+
+def test_hoy_titulo_horarios_y_horas_sobre_la_franja(client, db_path):
+  cargar(db_path, [marcacion(7, "2026-10-13 08:00:00"), marcacion(7, "2026-10-13 11:00:00")])
+  html = client.get("/hoy").text
+  # El encabezado solo dice Horarios: las horas van chiquitas arriba de la regla de cada fila
+  assert '<th scope="col" class="c-jornada">Horarios</th>' in html and "La jornada<" not in html
+  assert '<span class="marca-hora" style="left: 0.0%">07</span>' in html
+  assert '<span class="marca-hora" style="left: 100.0%">19</span>' in html
+
+
+def test_hoy_elegir_un_dia_anterior(client, db_path):
+  emp(db_path, "USER PIN=1\tName=Zoe\tPri=0\nUSER PIN=2\tName=Beto\tPri=0\n"
+               "USER PIN=3\tName=Ana\tPri=0\n")
+  cargar(db_path, [
+    marcacion(1, "2026-10-12 08:00:00"), marcacion(1, "2026-10-12 16:00:00"),  # se retiró
+    marcacion(2, "2026-10-12 08:30:00"),  # se olvidó la salida
+    marcacion(3, "2026-10-13 08:00:00"),  # hoy: no cuenta el 12
+  ])
+  html = client.get("/hoy?dia=2026-10-12").text
+  assert "Lunes 12 de octubre" in html and "Estás viendo un día anterior" in html
+  assert 'hx-get="/hoy/tabla?dia=2026-10-12"' in html
+  assert 'data-dia="2026-10-11"' in html and 'href="/hoy" data-dia="2026-10-13"' in html
+  beto = re.search(r'<tr class="fila"[^>]*data-pin="2".*?</tr>', html, re.S).group(0)
+  # Un día pasado nadie "sigue en el colegio": le faltó la salida, sin horas "hasta ahora"
+  assert "Sin salida" in beto and "hasta ahora" not in beto and "tramo falta" in beto
+  assert 'class="hora-actual"' not in html and "--ahora" not in html
+  ana = re.search(r'<tr class="fila"[^>]*data-pin="3".*?</tr>', html, re.S).group(0)
+  assert 'data-estado="sin_marcar"' in ana
+  # El refresco respeta el día elegido
+  assert "Lunes 12 de octubre" in client.get("/hoy/tabla?dia=2026-10-12").text
+
+
+def test_hoy_dia_futuro_o_invalido_muestra_hoy(client, db_path):
+  for dia in ("2026-10-20", "basura", ""):
+    html = client.get(f"/hoy?dia={dia}").text
+    assert "Martes 13 de octubre" in html and 'class="hora-actual"' in html
+    assert 'hx-get="/hoy/tabla"' in html and 'aria-disabled="true"' in html  # no hay "siguiente"

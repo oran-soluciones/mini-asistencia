@@ -2,7 +2,9 @@
 {% from "_iconos.html" import ico %}
 {% block titulo %}Hoy{% endblock %}
 {% block contenido %}
-<section id="hoy" class="hoy" data-filtro="{{ estado }}">
+<section id="hoy" class="hoy{% if not es_hoy %} pasado{% endif %}" data-filtro="{{ estado }}" data-hoy="{{ hoy_iso }}">
+  {# Fuera del título (que se refresca cada 5 s) para que el calendario abierto no se cierre #}
+  <input type="date" id="dia-elegido" class="dia-input" value="{{ dia_iso }}" max="{{ hoy_iso }}" tabindex="-1" aria-label="Día a mostrar">
   {% include "_hoy_titulo.html" %}
   <div class="barra-filtro">
     {% include "_hoy_conteos.html" %}

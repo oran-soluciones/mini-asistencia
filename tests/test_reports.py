@@ -31,7 +31,7 @@ def test_resumen_una_sola_marcacion():
   [r] = reports.resumen_por_dia([fila("7", "2026-10-12 08:00:00")])
   assert r.entrada == datetime(2026, 10, 12, 8) and r.salida is None
   assert r.horas == timedelta(0) and r.cantidad == 1
-  assert r.observacion == "Falta la salida (o la entrada)"
+  assert r.observacion == "Falta la salida (marcaciones impares)"
 
 
 def test_resumen_repetidas_a_menos_de_2_minutos():
@@ -50,16 +50,35 @@ def test_resumen_repetidas_a_menos_de_2_minutos():
 def test_resumen_solo_repetidas_queda_sin_salida():
   [r] = reports.resumen_por_dia([fila("7", "2026-10-12 08:00:00"), fila("7", "2026-10-12 08:00:40")])
   assert r.salida is None and r.horas == timedelta(0) and r.cantidad == 2
-  assert r.observacion == "1 repetida(s) ignorada(s); Falta la salida (o la entrada)"
+  assert r.observacion == "1 repetida(s) ignorada(s); Falta la salida (marcaciones impares)"
 
 
-def test_resumen_mas_de_dos_usa_primera_y_ultima():
+def test_resumen_de_a_pares_suma_cada_par():
   [r] = reports.resumen_por_dia([
     fila("7", "2026-10-12 17:00:00"), fila("7", "2026-10-12 08:00:00"),  # desordenadas
     fila("7", "2026-10-12 12:00:00"), fila("7", "2026-10-12 13:00:00"),
   ])
-  assert r.cantidad == 4 and horas(r) == 9
-  assert r.observacion == "2 marcaciones intermedias (se usó la primera y la última)"
+  assert r.cantidad == 4 and horas(r) == 8 and r.observacion == ""  # 4 h + 4 h
+  assert [(e.hour, s.hour) for e, s in r.pares] == [(8, 12), (13, 17)]
+
+
+def test_resumen_impar_el_ultimo_par_no_suma():
+  [r] = reports.resumen_por_dia([fila("7", "2026-10-12 08:00:00"), fila("7", "2026-10-12 12:00:00"),
+                                 fila("7", "2026-10-12 13:00:00")])
+  assert horas(r) == 4 and r.salida is None and r.alerta
+  assert r.observacion == "Falta la salida (marcaciones impares)"
+
+
+def test_resumen_anuladas_no_cuentan_y_se_anotan():
+  filas = [fila("7", "2026-10-12 08:00:00"), fila("7", "2026-10-12 08:05:00"),
+           fila("7", "2026-10-12 17:00:00")]
+  filas[1]["anulada"] = "2026-10-12 18:00:00"
+  [r] = reports.resumen_por_dia(filas)
+  assert horas(r) == 9 and r.cantidad == 2 and not r.alerta
+  assert r.observacion == "1 anulada(s) a mano"
+  # un día con todas sus marcaciones anuladas no aparece
+  filas = [dict(fila("7", "2026-10-12 08:00:00"), anulada="x")]
+  assert reports.resumen_por_dia(filas) == []
 
 
 def test_resumen_dos_empleados_y_dos_dias_ordenados_por_dia_y_pin():
@@ -108,14 +127,14 @@ def test_excel_respuesta_y_hojas(client, db_path):
   assert r.headers["content-type"] == XLSX
   assert r.headers["content-disposition"] == 'attachment; filename="asistencia_todo_todo.xlsx"'
   wb = abrir(r)
-  assert wb.sheetnames == ["Resumen por día", "Detalle", "Info"]  # se abre en el resumen
+  assert wb.sheetnames == ["Resumen por día", "Línea de tiempo", "Detalle", "Info"]  # se abre en el resumen
   assert wb.active.title == "Resumen por día"
-  assert [bool(h.sheet_view.tabSelected) for h in wb.worksheets] == [True, False, False]
+  assert [bool(h.sheet_view.tabSelected) for h in wb.worksheets] == [True, False, False, False]
   ws = wb["Detalle"]
   assert titulos(ws) == ["Fecha", "Hora", "Tipo", "PIN", "Nombre", "Verificación", "SN"]
   # Los títulos están en la fila 5 (debajo del encabezado del documento): se congelan y filtran
   assert ws.freeze_panes == "A6" and ws.auto_filter.ref == "A5:G10"
-  assert ws["A5"].font.b and ws["A5"].fill.fgColor.rgb.endswith("1D3A33")
+  assert ws["A5"].font.b and ws["A5"].fill.fgColor.rgb.endswith("262626")
   assert ws["A5"].font.color.rgb.endswith("FFFFFF")
   filas = datos(ws)
   assert len(filas) == 5
@@ -135,26 +154,55 @@ def test_excel_resumen_horas_y_total(client, db_path, monkeypatch):
     marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 17:00:00"),
     marcacion(8, "2026-10-12 09:00:00"), marcacion(8, "2026-10-12 09:01:00"),
     marcacion(8, "2026-10-12 12:00:00"), marcacion(8, "2026-10-12 13:30:00"),
+    marcacion(8, "2026-10-12 15:00:00"),
     marcacion(99, "2026-10-13 10:00:00"),
   ])
   ws = abrir(client.get("/marcaciones/excel?desde=&hasta=&pin="))["Resumen por día"]
+  # Una columna Entrada/Salida por par (Luis salió y volvió: 2 pares)
   assert titulos(ws) == [
-    "Fecha", "PIN", "Nombre", "Entrada", "Salida", "Cantidad", "Horas trabajadas", "Observación"]
-  assert ws.freeze_panes == "A6" and ws.auto_filter.ref == "A5:H8"
+    "Fecha", "PIN", "Nombre", "Entrada 1", "Salida 1", "Entrada 2", "Salida 2", "Cantidad",
+    "Horas trabajadas", "Observación"]
+  assert ws.freeze_panes == "A6" and ws.auto_filter.ref == "A5:J8"
   [a, b, c] = datos(ws)[:3]
-  assert a[:6] == [datetime(2026, 10, 12), 7, "Ana Gómez", time(8), time(17), 2]
-  assert a[6] == timedelta(hours=9) and a[7] is None
-  assert b[1:6] == [8, "Luis Pérez", time(9), time(13, 30), 4]
-  assert b[6] == timedelta(hours=4.5) and "1 repetida(s)" in b[7] and "1 marcaciones intermedias" in b[7]
-  assert c[1:6] == [99, None, time(10), None, 1]
-  assert c[6] == timedelta(0) and "Falta la salida" in c[7]
-  assert ws["G6"].number_format == "[h]:mm"
-  assert ws["H8"].fill.fgColor.rgb.endswith("FBEFD5") and not ws["H6"].fill.fgColor.rgb.endswith("FBEFD5")
-  assert ws["A7"].fill.fgColor.rgb.endswith("F3F6F2") and ws["A6"].fill.fill_type is None  # cebra
+  assert a[:8] == [datetime(2026, 10, 12), 7, "Ana Gómez", time(8), time(17), None, None, 2]
+  assert a[8] == timedelta(hours=9) and a[9] is None
+  assert b[1:8] == [8, "Luis Pérez", time(9), time(12), time(13, 30), time(15), 5]
+  assert b[8] == timedelta(hours=4.5) and b[9] == "1 repetida(s) ignorada(s)"
+  assert c[1:8] == [99, None, time(10), None, None, None, 1]
+  assert c[8] == timedelta(0) and "Falta la salida" in c[9]
+  assert ws["I6"].number_format == "[h]:mm" and ws.column_dimensions["C"].width >= 30
+  assert ws["J8"].fill.fgColor.rgb.endswith("FBEFD5") and not ws["J6"].fill.fgColor.rgb.endswith("FBEFD5")
+  assert ws["A7"].fill.fgColor.rgb.endswith("F4F4F4") and ws["A6"].fill.fill_type is None  # cebra
   total = [row for row in ws.iter_rows() if row[0].value == "Total"][0]
-  assert total[6].value == timedelta(hours=13.5) and total[6].number_format == "[h]:mm"
+  assert total[8].value == timedelta(hours=13.5) and total[8].number_format == "[h]:mm"
   notas = " ".join(str(row[0].value) for row in ws.iter_rows() if row[0].value)
-  assert "no contempla almuerzo, turnos ni horarios" in notas
+  assert "van de a pares" in notas and "no contempla turnos ni horarios" in notas
+
+
+def test_excel_linea_de_tiempo(client, db_path, monkeypatch):
+  monkeypatch.setattr(db, "ahora", lambda: datetime(2026, 10, 20, 9, 0))
+  cargar(db_path, [
+    marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 12:00:00"),
+    marcacion(7, "2026-10-12 13:00:00"), marcacion(7, "2026-10-12 17:00:00"),
+    marcacion(8, "2026-10-12 09:00:00"),
+  ])
+  ws = abrir(client.get("/marcaciones/excel?desde=&hasta="))["Línea de tiempo"]
+  t = titulos(ws)
+  assert t[:4] == ["Fecha", "Nombre", "Horario", "Horas"] and t[4] == "07"  # de 07 a 19 h
+  assert len(t) == 4 + 12 * 4  # franjas de 15 minutos
+  [a, b] = datos(ws)[:2]
+  assert a[2] == "08:00 a 12:00  ·  13:00 a 17:00" and a[3] == timedelta(hours=8)
+  assert b[2] == "09:00 a ?"
+
+  def color(fila, hora, minuto=0):
+    col = 5 + (hora - 7) * 4 + minuto // 15
+    celda = ws.cell(fila, col)
+    return celda.fill.fgColor.rgb[-6:] if celda.fill.fill_type else None
+
+  assert color(6, 7, 45) is None and color(6, 8) == reports.COLOR_PRESENTE
+  assert color(6, 11, 45) == reports.COLOR_PRESENTE and color(6, 12) is None  # el hueco
+  assert color(6, 13) == reports.COLOR_PRESENTE and color(6, 17) is None
+  assert color(7, 9) == reports.COLOR_FALTA and color(7, 9, 15) is None  # sin salida
 
 
 def test_excel_info(client, db_path):
@@ -309,7 +357,7 @@ def test_excel_columna_tipo_en_detalle():
     fila("8", "2026-10-12 09:00:00", "Luis"),
   ])
   ws = wb["Detalle"]
-  assert [f[2] for f in datos(ws)] == ["Entrada", "Repetida", "Intermedia", "Salida", "Entrada"]
+  assert [f[2] for f in datos(ws)] == ["Entrada", "Repetida", "Salida", "Entrada", "Entrada"]
   assert ws["C7"].font.i and not ws["C6"].font.i  # la repetida va en cursiva y apagada
 
 
@@ -343,7 +391,7 @@ def test_resumen_del_dia_de_hoy_con_una_marcacion_no_es_un_error():
   ], hoy)
   por_pin = {r.pin: r for r in res}
   assert por_pin["7"].observacion == "Sin salida todavía" and not por_pin["7"].alerta
-  assert por_pin["8"].observacion == "Falta la salida (o la entrada)" and por_pin["8"].alerta
+  assert por_pin["8"].observacion == "Falta la salida (marcaciones impares)" and por_pin["8"].alerta
   assert por_pin["9"].observacion == "1 repetida(s) ignorada(s); Sin salida todavía"
   assert por_pin["9"].alerta  # la repetida sí es una observación a mirar
   # sin "ahora" (los usos de siempre) todo día con una sola marcación es un error
@@ -354,7 +402,7 @@ def test_excel_a_media_jornada_no_pinta_en_ambar_lo_de_hoy():
   ws = excel([fila("7", "2026-10-13 08:00:00"), fila("8", "2026-10-12 08:00:00", "Luis")],
              generado=datetime(2026, 10, 13, 11, 0))["Resumen por día"]
   ayer, hoy = datos(ws)[0], datos(ws)[1]
-  assert ayer[7] == "Falta la salida (o la entrada)" and hoy[7] == "Sin salida todavía"
+  assert ayer[7] == "Falta la salida (marcaciones impares)" and hoy[7] == "Sin salida todavía"
   assert ws["H6"].fill.fgColor.rgb.endswith("FBEFD5")      # el día pasado, en ámbar
   assert not ws["H7"].fill.fgColor.rgb.endswith("FBEFD5")  # hoy: informativo, sin ámbar
   assert ws["H7"].font.i
@@ -367,4 +415,4 @@ def test_excel_endpoint_usa_la_hora_de_la_pc_para_decidir_que_es_hoy(client, db_
   assert datos(ws)[0][7] == "Sin salida todavía"
   monkeypatch.setattr(db, "ahora", lambda: datetime(2026, 10, 13, 10, 0))
   ws = abrir(client.get("/marcaciones/excel?desde=&hasta="))["Resumen por día"]
-  assert datos(ws)[0][7] == "Falta la salida (o la entrada)"
+  assert datos(ws)[0][7] == "Falta la salida (marcaciones impares)"

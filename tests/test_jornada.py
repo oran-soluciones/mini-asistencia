@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from app import jornada
 from app.jornada import (
-  EN_COLEGIO, ENTRADA, INTERMEDIA, REPETIDA, SALIDA, SE_RETIRO, SIN_MARCAR,
+  ANULADA, EN_COLEGIO, ENTRADA, REPETIDA, SALIDA, SE_RETIRO, SIN_MARCAR,
   analizar, fecha_larga, fmt_horas, tipos_de_marcaciones, vista_hoy,
 )
 
@@ -38,12 +38,35 @@ def test_una_marcacion_es_entrada_sin_salida():
   assert j.tipos == [ENTRADA] and j.entrada == dt("08:00:00") and j.salida is None
 
 
-def test_primera_entrada_ultima_salida_intermedias_en_el_medio():
+def test_de_a_pares_entrada_salida_entrada_salida():
   j = analizar([dt("17:00:00"), dt("08:00:00"), dt("12:00:00"), dt("13:00:00")])  # desordenadas
   assert j.momentos == [dt("08:00:00"), dt("12:00:00"), dt("13:00:00"), dt("17:00:00")]
-  assert j.tipos == [ENTRADA, INTERMEDIA, INTERMEDIA, SALIDA]
+  assert j.tipos == [ENTRADA, SALIDA, ENTRADA, SALIDA]
   assert (j.entrada, j.salida) == (dt("08:00:00"), dt("17:00:00"))
-  assert j.intermedias == [dt("12:00:00"), dt("13:00:00")]
+  assert j.pares == [(dt("08:00:00"), dt("12:00:00")), (dt("13:00:00"), dt("17:00:00"))]
+  assert j.horas == timedelta(hours=8) and not j.abierta  # 4 h + 4 h, sin el hueco del medio
+
+
+def test_impar_queda_abierta_y_el_par_abierto_no_suma_horas():
+  j = analizar([dt("08:00:00"), dt("12:00:00"), dt("13:00:00")])
+  assert j.tipos == [ENTRADA, SALIDA, ENTRADA] and j.abierta and j.salida is None
+  assert j.pares[-1] == (dt("13:00:00"), None) and j.horas == timedelta(hours=4)
+
+
+def test_tipos_cada_dia_empieza_con_entrada():
+  filas = [marca("1", "08:00:00"), marca("1", "12:00:00"), marca("1", "13:00:00"),
+           marca("1", "09:00:00", "2026-10-14"), marca("1", "15:00:00", "2026-10-14")]
+  assert tipos_de_marcaciones(filas) == [ENTRADA, SALIDA, ENTRADA, ENTRADA, SALIDA]
+
+
+def test_anulada_no_cuenta_y_las_demas_se_reacomodan():
+  # Marcó 08:00, 08:05 (por error) y 17:00: sin anular, 17:00 sería una entrada sin salida
+  filas = [marca("1", "08:00:00"), marca("1", "08:05:00"), marca("1", "17:00:00")]
+  assert tipos_de_marcaciones(filas) == [ENTRADA, SALIDA, ENTRADA]
+  filas[1]["anulada"] = "2026-10-13 18:00:00"
+  assert tipos_de_marcaciones(filas) == [ENTRADA, ANULADA, SALIDA]
+  f = vista_hoy([emp("1", "Zoe")], filas, datetime(2026, 10, 13, 18, 0)).filas[0]
+  assert f.estado == SE_RETIRO and f.horas == timedelta(hours=9)
 
 
 def test_repetidas_a_menos_de_2_minutos_se_ignoran():
@@ -146,8 +169,8 @@ def test_reloj_de_la_pc_atrasado_no_da_horas_negativas():
 
 def test_sin_marcar_no_tiene_horas_ni_tramo():
   f = vista_hoy([emp("2", "Ana")], [], AHORA).filas[0]
-  assert (f.estado, f.entrada, f.salida, f.horas, f.tramo, f.ticks, f.ultima, f.celda_nueva) == (
-    SIN_MARCAR, None, None, None, None, [], "", "")
+  assert (f.estado, f.entrada, f.salida, f.horas, f.tramos, f.ultima, f.celda_nueva) == (
+    SIN_MARCAR, None, None, None, [], "", "")
 
 
 def test_repetida_no_cambia_el_estado_ni_la_ultima():
@@ -155,21 +178,30 @@ def test_repetida_no_cambia_el_estado_ni_la_ultima():
   assert f.estado == EN_COLEGIO and f.repetidas == 1 and f.ultima == "2026-10-13 07:30:00"
 
 
-def test_intermedias_son_ticks_y_la_ultima_valida_es_la_salida():
-  marcas = [marca("1", "08:00:00"), marca("1", "12:00:00"), marca("1", "16:00:00")]
+def test_salio_y_volvio_un_tramo_por_par_y_horas_hasta_ahora():
+  marcas = [marca("1", "07:30:00"), marca("1", "08:30:00"), marca("1", "09:30:00")]
   f = vista_hoy([emp("1", "Zoe")], marcas, AHORA).filas[0]
-  assert f.estado == SE_RETIRO and f.salida == dt("16:00:00")
-  assert f.ticks == [41.667]  # 12:00 en la franja de 07:00 a 19:00
-  assert f.ultima == "2026-10-13 16:00:00" and f.celda_nueva == "salida"
+  assert f.estado == EN_COLEGIO and f.salida is None and f.horas_parcial
+  assert f.horas == timedelta(hours=2)  # 07:30-08:30 + 09:30-10:30 (ahora)
+  assert [t.abierto for t in f.tramos] == [False, True]
+  assert f.ultima == "2026-10-13 09:30:00" and f.celda_nueva == "entrada"
+
+
+def test_dos_pares_se_retiro_con_la_ultima_salida():
+  marcas = [marca("1", "08:00:00"), marca("1", "09:00:00"), marca("1", "09:30:00"),
+            marca("1", "10:00:00")]
+  f = vista_hoy([emp("1", "Zoe")], marcas, AHORA).filas[0]
+  assert f.estado == SE_RETIRO and f.salida == dt("10:00:00") and not f.horas_parcial
+  assert f.horas == timedelta(hours=1, minutes=30) and len(f.tramos) == 2
 
 
 def test_posiciones_en_la_franja_de_las_7_a_las_19():
   v = vista_hoy([emp("1", "Zoe"), emp("2", "Beto")],
                 [marca("1", "07:30:00"), marca("1", "13:00:00"), marca("2", "07:00:00")], AHORA)
   zoe, beto = por_pin(v)["1"], por_pin(v)["2"]
-  assert zoe.tramo == jornada.Tramo(4.167, 45.833, False, False, False)  # 07:30 -> 13:00
+  assert zoe.tramos[0] == jornada.Tramo(4.167, 45.833, False, False, False)  # 07:30 -> 13:00
   # Beto: de 07:00 hasta ahora (10:30): extremo abierto
-  assert beto.tramo == jornada.Tramo(0.0, 29.167, True, False, False)
+  assert beto.tramos[0] == jornada.Tramo(0.0, 29.167, True, False, False)
   assert v.ahora_pct == 29.167
 
 
@@ -178,10 +210,10 @@ def test_fuera_de_la_franja_se_recorta_al_borde_y_se_indica():
                 [marca("1", "06:30:00"), marca("1", "19:30:00"),
                  marca("2", "20:00:00")], datetime(2026, 10, 13, 21, 0))
   madrugador, tarde = por_pin(v)["1"], por_pin(v)["2"]
-  assert madrugador.tramo == jornada.Tramo(0.0, 100.0, False, True, True)
+  assert madrugador.tramos[0] == jornada.Tramo(0.0, 100.0, False, True, True)
   # Entró a las 20:00 y sigue: todo queda a la derecha de la franja
-  assert tarde.tramo.izq == 100.0 and tarde.tramo.ancho == 0.0
-  assert tarde.tramo.abierto and tarde.tramo.recorte_der
+  assert tarde.tramos[0].izq == 100.0 and tarde.tramos[0].ancho == 0.0
+  assert tarde.tramos[0].abierto and tarde.tramos[0].recorte_der
   assert v.ahora_pct is None  # son las 21:00: la línea "ahora" no se dibuja
 
 
@@ -215,3 +247,4 @@ def test_ultima_marcacion_ignora_repetidas_y_dias_anteriores():
 
 def test_sin_marcaciones_no_hay_ultima():
   assert vista_hoy([emp("3", "Beto")], [], AHORA).ultima is None
+

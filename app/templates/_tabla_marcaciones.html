@@ -1,3 +1,4 @@
+{% from "_iconos.html" import ico %}
 <div id="tabla-marcaciones" hx-get="{{ refresco }}" hx-trigger="every 5s" hx-swap="outerHTML">
   {% if truncado %}
   <p class="alerta alerta-aviso"><span>Se muestran solo las {{ limite }} marcaciones más nuevas; hay más. Acotá el rango de fechas o elegí un empleado.</span></p>
@@ -5,11 +6,11 @@
   <div class="tabla-scroll">
     <table class="planilla-tabla marcaciones">
       <thead>
-        <tr><th scope="col">Fecha</th><th scope="col">Hora</th><th scope="col">Tipo</th><th scope="col">PIN</th><th scope="col">Nombre</th><th scope="col">Verificación</th><th scope="col">Reloj (SN)</th></tr>
+        <tr><th scope="col">Fecha</th><th scope="col">Hora</th><th scope="col">Tipo</th><th scope="col">PIN</th><th scope="col">Nombre</th><th scope="col">Verificación</th><th scope="col">Reloj (SN)</th><th scope="col"><span class="sr-only">Acción</span></th></tr>
       </thead>
       <tbody>
         {% for m in filas %}
-        <tr>
+        <tr{% if m.anulada %} class="anulada"{% endif %}>
           <td class="num c-fecha">{{ m.fecha }}</td>
           <td class="num c-hora">{{ m.hora }}</td>
           <td class="c-tipo">{% if m.tipo %}<span class="tipo tipo-{{ m.tipo|lower }}">{{ m.tipo }}</span>{% else %}<span class="suave" title="El día está cortado por el límite de filas">–</span>{% endif %}</td>
@@ -21,9 +22,22 @@
             {%- else %}{{ m.verificacion }}{% endif -%}
           </td>
           <td class="num c-sn" data-label="Reloj">{{ m.sn }}</td>
+          <td class="c-accion">
+            {%- if m.anulada %}
+            <form method="post" action="/marcaciones/{{ m.id }}/restaurar" class="en-linea">
+              <input type="hidden" name="desde" value="{{ desde }}"><input type="hidden" name="hasta" value="{{ hasta }}"><input type="hidden" name="pin" value="{{ pin }}">
+              <button type="submit" class="btn btn-chico" title="Vuelve a contar en la jornada y en el Excel">{{ ico("check") }}<span>Restaurar</span></button>
+            </form>
+            {%- else %}
+            <form method="post" action="/marcaciones/{{ m.id }}/anular" class="en-linea" data-msg="¿Anular la marcación de {{ m.nombre or ('PIN ' ~ m.pin) }} del {{ m.fecha }} a las {{ m.hora }}? Deja de contar en Hoy y en el Excel, y las demás de ese día se reacomodan (entrada, salida…). Se puede restaurar." onsubmit="return confirm(this.dataset.msg)">
+              <input type="hidden" name="desde" value="{{ desde }}"><input type="hidden" name="hasta" value="{{ hasta }}"><input type="hidden" name="pin" value="{{ pin }}">
+              <button type="submit" class="btn btn-chico btn-peligro">{{ ico("x") }}<span>Anular</span></button>
+            </form>
+            {%- endif -%}
+          </td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="vacio">No hay marcaciones para este filtro. Probá con otro rango de fechas o tocá "Ver todo".</td></tr>
+        <tr><td colspan="8" class="vacio">No hay marcaciones para este filtro. Probá con otro rango de fechas o tocá "Ver todo".</td></tr>
         {% endfor %}
       </tbody>
     </table>

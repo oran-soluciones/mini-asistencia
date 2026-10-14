@@ -5,7 +5,8 @@ porque el reloj lo necesita, pero el panel no tiene que verse desde afuera. Los 
 rechazan orígenes ajenos (CSRF: una web abierta en el navegador podría postear a localhost).
 """
 import re
-from datetime import date, datetime
+import socket
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from urllib.parse import urlencode, urlsplit
 
@@ -149,7 +150,7 @@ def _filas_marcaciones(filas, truncado: bool) -> list[dict]:
   """Filas para la tabla: fecha y hora separadas y el Tipo (misma regla que el Excel).
 
   Si la lista se cortó por el límite, el día más viejo puede estar incompleto y su Tipo
-  sería engañoso (la "entrada" real quedó afuera): ese día se muestra sin Tipo.
+  sería engañoso (la "entrada" real quedó afuera): ese día se muestra sin Tipo (salvo Anulada).
   """
   tipos = jornada.tipos_de_marcaciones(filas)
   incompleto = min((f["fecha_hora"][:10] for f in filas), default=None) if truncado else None
@@ -157,9 +158,10 @@ def _filas_marcaciones(filas, truncado: bool) -> list[dict]:
   for f, tipo in zip(filas, tipos):
     momento = datetime.fromisoformat(f["fecha_hora"])
     resultado.append({
-      "fecha": f"{momento:%d/%m/%Y}", "hora": f"{momento:%H:%M:%S}", "pin": f["pin"],
-      "nombre": f["nombre"], "verificacion": f["verificacion"], "sn": f["sn"],
-      "tipo": "" if f["fecha_hora"][:10] == incompleto else tipo,
+      "id": f["id"], "fecha": f"{momento:%d/%m/%Y}", "hora": f"{momento:%H:%M:%S}",
+      "pin": f["pin"], "nombre": f["nombre"], "verificacion": f["verificacion"], "sn": f["sn"],
+      "anulada": jornada.anulada(f),
+      "tipo": tipo if tipo == jornada.ANULADA or f["fecha_hora"][:10] != incompleto else "",
     })
   return resultado
 
@@ -191,15 +193,36 @@ def inicio():
   return RedirectResponse("/hoy")
 
 
-def _contexto_hoy() -> dict:
+def _dia_elegido(valor: str | None, hoy: date) -> date:
+  """El día pedido en ?dia=YYYY-MM-DD; hoy si falta, es inválido o es del futuro."""
+  elegido = _fecha(valor)
+  dia = date.fromisoformat(elegido) if elegido else hoy
+  return hoy if dia > hoy else dia
+
+
+def _contexto_hoy(dia_param: str | None = None) -> dict:
   ahora = db.ahora()
-  dia = ahora.date().isoformat()
-  marcaciones, _ = db.listar_marcaciones(dia, dia, None, LIMITE_HOY)
-  vista = jornada.vista_hoy(db.listar_empleados(), marcaciones, ahora)
+  hoy = ahora.date()
+  dia = _dia_elegido(dia_param, hoy)
+  es_hoy = dia == hoy
+  momento = ahora if es_hoy else datetime.combine(dia, time(23, 59, 59))
+  marcaciones, _ = db.listar_marcaciones(dia.isoformat(), dia.isoformat(), None, LIMITE_HOY)
+  vista = jornada.vista_hoy(db.listar_empleados(), marcaciones, momento, en_curso=es_hoy)
+  estados = dict(jornada.ESTADOS)
+  if not es_hoy:  # en un día pasado nadie "sigue en el colegio": le faltó marcar la salida
+    estados[jornada.EN_COLEGIO] = "Sin salida"
+  siguiente = dia + timedelta(days=1)
   return {
     "vista": vista,
-    "fecha_larga": jornada.fecha_larga(ahora),
-    "dia_iso": dia,
+    "fecha_larga": jornada.fecha_larga(momento),
+    "es_hoy": es_hoy,
+    "estados": estados,
+    "dia_iso": dia.isoformat(),
+    "hoy_iso": hoy.isoformat(),
+    "dia_anterior": (dia - timedelta(days=1)).isoformat(),
+    "dia_siguiente": None if es_hoy else siguiente.isoformat(),
+    "siguiente_es_hoy": siguiente == hoy,
+    "refresco": "/hoy/tabla" + ("" if es_hoy else f"?dia={dia.isoformat()}"),
     "hora": f"{ahora:%H:%M}",
     "actualizado": f"{ahora:%H:%M:%S}",
     "nadie_marco": bool(vista.filas) and vista.conteos[jornada.SIN_MARCAR] == len(vista.filas),
@@ -207,17 +230,17 @@ def _contexto_hoy() -> dict:
 
 
 @router.get("/hoy")
-def hoy(request: Request, estado: str = "", q: str = ""):
-  contexto = _contexto_hoy()
+def hoy(request: Request, estado: str = "", q: str = "", dia: str = ""):
+  contexto = _contexto_hoy(dia)
   # El filtro vive en la URL (lo aplica panel.js en el navegador); acá solo se repone en la página
   contexto.update(activo="hoy", estado=estado if estado in jornada.ESTADOS else "", q=q[:80])
   return templates.TemplateResponse(request, "hoy.html", contexto)
 
 
 @router.get("/hoy/tabla")
-def hoy_tabla(request: Request):
+def hoy_tabla(request: Request, dia: str = ""):
   """Parcial HTMX: planilla (principal) + título y resumen (fuera de banda), cada 5 s."""
-  contexto = _contexto_hoy()
+  contexto = _contexto_hoy(dia)
   contexto["oob"] = True
   return templates.TemplateResponse(request, "_hoy.html", contexto)
 
@@ -240,6 +263,28 @@ def marcaciones_tabla(request: Request):
   """Parcial HTMX: solo la tabla (se refresca sola cada pocos segundos)."""
   return templates.TemplateResponse(request, "_tabla_marcaciones.html",
                                     _contexto_marcaciones(request))
+
+
+def _volver_a_marcaciones(desde: str, hasta: str, pin: str) -> RedirectResponse:
+  """Vuelve a la lista con los mismos filtros que tenía (vacíos = sin límite)."""
+  q = urlencode({"desde": _fecha(desde) or "", "hasta": _fecha(hasta) or "", "pin": pin})
+  return RedirectResponse(f"/marcaciones?{q}", status_code=303)
+
+
+@router.post("/marcaciones/{marcacion_id}/anular", dependencies=csrf)
+def marcacion_anular(marcacion_id: int, desde: str = Form(""), hasta: str = Form(""),
+                     pin: str = Form("")):
+  """Anula una marcación (p. ej. marcó dos veces y quedó como que nunca salió). No se borra:
+  deja de contar y las demás del día se reacomodan solas. Se puede restaurar."""
+  db.anular_marcacion(marcacion_id, True)
+  return _volver_a_marcaciones(desde, hasta, pin)
+
+
+@router.post("/marcaciones/{marcacion_id}/restaurar", dependencies=csrf)
+def marcacion_restaurar(marcacion_id: int, desde: str = Form(""), hasta: str = Form(""),
+                        pin: str = Form("")):
+  db.anular_marcacion(marcacion_id, False)
+  return _volver_a_marcaciones(desde, hasta, pin)
 
 
 @router.get("/marcaciones/excel")
@@ -401,7 +446,48 @@ def empleado_baja(request: Request, pin: str):
   return RedirectResponse("/empleados", status_code=303)
 
 
-# --- Configuración: nombre y logo del colegio -------------------------------------------------
+# --- Configuración: nombre y logo del colegio, y cómo conectar el reloj ----------------------
+
+def ips_locales() -> list[str]:
+  """IPv4 de esta PC en la red local (la que hay que cargar en el reloj). La primera es la de la
+  ruta por defecto; no se manda ningún paquete (connect de UDP solo elige la interfaz)."""
+  ips = []
+  try:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+      s.connect(("10.255.255.255", 1))
+      ips.append(s.getsockname()[0])
+  except OSError:
+    pass
+  try:
+    ips += [i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET)]
+  except OSError:
+    pass
+  vistas = []
+  for ip in ips:
+    if ip not in vistas and not ip.startswith(("127.", "169.254.", "0.")):
+      vistas.append(ip)
+  return vistas
+
+
+def comandos_pc(puerto: int) -> list[tuple[str, str, str]]:
+  """(título, comando, explicación) para dejar la PC lista. PowerShell como administrador."""
+  return [
+    ("Abrir el puerto en el firewall de Windows",
+     f'netsh advfirewall firewall add rule name="mini-asistencia {puerto}" dir=in action=allow '
+     f'protocol=TCP localport={puerto}',
+     "Una sola vez. Sin esta regla Windows bloquea al reloj aunque el programa esté andando."),
+    ("Marcar la red como Privada",
+     "Get-NetConnectionProfile | Set-NetConnectionProfile -NetworkCategory Private",
+     "Una sola vez. En una red Pública Windows bloquea las conexiones que llegan de otros equipos."),
+    ("Comprobar que el programa está escuchando",
+     f"netstat -ano | findstr :{puerto}",
+     f"Tiene que aparecer una línea con 0.0.0.0:{puerto} y LISTENING. Si no aparece, el programa "
+     "no está abierto (o ZKBio Time está usando el puerto)."),
+    ("Ver la IP de esta PC",
+     "ipconfig",
+     "Es la «Dirección IPv4» del adaptador Wi-Fi o Ethernet conectado a la misma red que el reloj."),
+  ]
+
 
 def _pagina_configuracion(request: Request, error: str | None = None, status_code: int = 200,
                           nombre: str | None = None):
@@ -410,7 +496,8 @@ def _pagina_configuracion(request: Request, error: str | None = None, status_cod
     {"activo": "configuracion", "error": error, "guardado": "guardado" in request.query_params,
      "nombre": colegio.leer()["nombre"] if nombre is None else nombre,
      "logo_tipo": colegio.tipo_logo(), "nombre_max": colegio.NOMBRE_MAX,
-     "logo_max_kb": colegio.LOGO_MAX_BYTES // 1024},
+     "logo_max_kb": colegio.LOGO_MAX_BYTES // 1024,
+     "ips": ips_locales(), "puerto": PORT, "comandos": comandos_pc(PORT)},
     status_code=status_code,
   )
 

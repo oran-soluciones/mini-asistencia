@@ -120,7 +120,7 @@ def tipos_de(html):
 
 
 def test_columna_tipo_usa_la_regla_de_la_jornada(client, db_path):
-  # Más nueva primero: 17:00 salida, 12:00 intermedia, 08:01 repetida, 08:00 entrada
+  # De a pares: 08:00 entrada, 08:01 repetida, 12:00 salida, 17:00 entrada (le falta la salida)
   cargar(db_path, [
     marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 08:01:30"),
     marcacion(7, "2026-10-12 12:00:00"), marcacion(7, "2026-10-12 17:00:00"),
@@ -128,7 +128,7 @@ def test_columna_tipo_usa_la_regla_de_la_jornada(client, db_path):
   ])
   html = client.get("/marcaciones?desde=&hasta=").text
   por_hora = dict(zip(re.findall(r'<td class="num c-hora">(\d\d:\d\d:\d\d)</td>', html), tipos_de(html)))
-  assert por_hora == {"17:00:00": "Salida", "12:00:00": "Intermedia", "08:01:30": "Repetida",
+  assert por_hora == {"17:00:00": "Entrada", "12:00:00": "Salida", "08:01:30": "Repetida",
                       "08:00:00": "Entrada", "09:00:00": "Entrada"}
   assert "tipo-repetida" in html
 
@@ -148,6 +148,67 @@ def test_columna_tipo_se_omite_en_el_dia_cortado_por_el_limite(client, db_path, 
   html = client.get("/marcaciones?desde=&hasta=").text
   # El 11 quedó con una sola fila visible: su Tipo sería engañoso, no se muestra
   assert tipos_de(html) == ["Salida", "Entrada"]
+
+
+def id_de(db_path, fecha_hora):
+  with db.closing(db.connect(db_path)) as conn:
+    return conn.execute("SELECT id FROM marcaciones WHERE fecha_hora = ?", (fecha_hora,)).fetchone()[0]
+
+
+def test_anular_y_restaurar_una_marcacion(client, db_path):
+  # Marcó 08:00, otra vez 08:05 por error, y 17:00: la de 17:00 quedaba como entrada
+  cargar(db_path, [marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 08:05:00"),
+                   marcacion(7, "2026-10-12 17:00:00")])
+  html = client.get("/marcaciones?desde=2026-10-12&hasta=2026-10-12").text
+  assert tipos_de(html) == ["Entrada", "Salida", "Entrada"] and html.count("Anular</span>") == 3
+  marca_id = id_de(db_path, "2026-10-12 08:05:00")
+  r = client.post(f"/marcaciones/{marca_id}/anular",
+                  data={"desde": "2026-10-12", "hasta": "2026-10-12", "pin": "7"},
+                  follow_redirects=False)
+  assert r.status_code == 303
+  assert r.headers["location"] == "/marcaciones?desde=2026-10-12&hasta=2026-10-12&pin=7"
+  html = client.get(r.headers["location"]).text
+  # No se borra: se ve tachada como Anulada y las demás se reacomodan
+  assert tipos_de(html) == ["Salida", "Anulada", "Entrada"]
+  assert 'class="anulada"' in html and "Restaurar</span>" in html
+  # El Excel y la cantidad de marcaciones del empleado tampoco la cuentan
+  assert db.anular_marcacion(marca_id, True, db_path) is False  # ya estaba anulada
+  r = client.post(f"/marcaciones/{marca_id}/restaurar", data={}, follow_redirects=False)
+  assert r.headers["location"] == "/marcaciones?desde=&hasta=&pin="
+  html = client.get("/marcaciones?desde=2026-10-12&hasta=2026-10-12").text
+  assert tipos_de(html) == ["Entrada", "Salida", "Entrada"]
+
+
+def test_anulada_no_cuenta_en_el_excel_ni_en_empleados(client, db_path):
+  db.upsert_empleados(SN, parse_users(fixture_text("operlog_usuarios.txt")), db_path)
+  cargar(db_path, [marcacion(7, "2026-10-12 08:00:00"), marcacion(7, "2026-10-12 08:05:00"),
+                   marcacion(7, "2026-10-12 17:00:00")])
+  db.anular_marcacion(id_de(db_path, "2026-10-12 08:05:00"), True, db_path)
+  [emp] = [e for e in db.listar_empleados(db_path) if e["pin"] == "7"]
+  assert emp["marcaciones"] == 2
+
+
+def test_anular_rechaza_otro_origen_y_clientes_no_locales(client, client_externo, db_path):
+  cargar(db_path, [marcacion(7, "2026-10-12 08:00:00")])
+  marca_id = id_de(db_path, "2026-10-12 08:00:00")
+  r = client.post(f"/marcaciones/{marca_id}/anular", headers={"origin": "http://malo.com"})
+  assert r.status_code == 403
+  assert client_externo.post(f"/marcaciones/{marca_id}/anular").status_code == 403
+  assert db.listar_marcaciones(None, None, None, 10, db_path)[0][0]["anulada"] is None
+
+
+def test_base_vieja_sin_columna_anulada_se_migra(tmp_path):
+  import sqlite3
+  ruta = tmp_path / "vieja.db"
+  conn = sqlite3.connect(ruta)
+  conn.execute("CREATE TABLE marcaciones (id INTEGER PRIMARY KEY AUTOINCREMENT, sn TEXT NOT NULL,"
+               " pin TEXT NOT NULL, fecha_hora TEXT NOT NULL, estado INTEGER, verificacion INTEGER,"
+               " raw TEXT NOT NULL, recibido TEXT NOT NULL, UNIQUE (sn, pin, fecha_hora))")
+  conn.commit()
+  conn.close()
+  cargar(ruta, [marcacion(7, "2026-10-12 08:00:00")])
+  [fila] = db.listar_marcaciones(None, None, None, 10, ruta)[0]
+  assert fila["anulada"] is None
 
 
 def test_se_escapa_el_html(client, db_path):

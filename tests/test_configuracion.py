@@ -220,3 +220,23 @@ def test_configuracion_desde_la_red_da_403(client_externo):
   assert r.status_code == 403
   assert client_externo.post("/configuracion/logo/quitar").status_code == 403
   assert colegio.leer()["nombre"] == ""
+
+
+def test_configuracion_explica_como_conectar_el_reloj(client, db_path, monkeypatch):
+  monkeypatch.setattr(panel, "ips_locales", lambda: ["192.168.1.50", "10.0.0.7"])
+  html = client.get("/configuracion").text
+  assert "Conectar el reloj" in html
+  assert '<span class="valor num">192.168.1.50</span>' in html and "10.0.0.7" in html
+  assert f'<span class="valor num">{panel.PORT}</span>' in html
+  assert f"localport={panel.PORT}" in html and f"findstr :{panel.PORT}" in html
+  assert "data-copiar=" in html and "Todavía no se conectó" in html
+
+
+def test_configuracion_sin_red_lo_avisa(client, db_path, monkeypatch):
+  monkeypatch.setattr(panel, "ips_locales", lambda: [])
+  assert "No se encontró" in client.get("/configuracion").text
+
+
+def test_ips_locales_sin_loopback():
+  ips = panel.ips_locales()
+  assert all(not ip.startswith(("127.", "169.254.")) for ip in ips) and len(ips) == len(set(ips))

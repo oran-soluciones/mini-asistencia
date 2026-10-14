@@ -1,10 +1,11 @@
 /* Panel de mini-asistencia: JS mínimo, sin dependencias (aparte de htmx).
+   - Hoy: elegir el día (anterior / calendario / siguiente), conservando filtro y búsqueda.
    - Hoy: filtro por estado y buscador del lado del cliente; se conservan en la URL
      (?estado=&q=) y se vuelven a aplicar después de cada refresco de htmx.
    - Hoy: "entintado" cuando el refresco trae una marcación nueva: la celda de hora de la fila,
      el renglón "Última marcación" y el número del segmento que cambió.
    - Aviso si el panel deja de responder; estado de carga del botón de Excel.
-   - Configuración: vista previa del logo y del nombre. */
+   - Configuración: vista previa del logo y del nombre; botones "Copiar" de los comandos. */
 (function () {
   "use strict";
 
@@ -27,7 +28,9 @@
   }
 
   function guardarUrl() {
-    var params = new URLSearchParams();
+    var params = new URLSearchParams(window.location.search); // conserva ?dia=
+    params.delete("estado");
+    params.delete("q");
     if (estado) params.set("estado", estado);
     if (q) params.set("q", q);
     var texto = params.toString();
@@ -145,6 +148,40 @@
     aplicar();
   }
 
+  // Hoy: cambiar de día conservando el filtro y la búsqueda
+  function irADia(iso) {
+    var hoy = document.getElementById("hoy");
+    var params = new URLSearchParams();
+    if (iso && hoy && iso < hoy.dataset.hoy) params.set("dia", iso);
+    if (estado) params.set("estado", estado);
+    if (q) params.set("q", q);
+    var texto = params.toString();
+    window.location.href = "/hoy" + (texto ? "?" + texto : "");
+  }
+
+  function iniciarDia() {
+    var hoy = document.getElementById("hoy");
+    var input = document.getElementById("dia-elegido");
+    if (!hoy || !input) return;
+    hoy.addEventListener("click", function (e) {
+      var enlace = e.target.closest("a[data-dia]");
+      if (enlace) {
+        e.preventDefault();
+        irADia(enlace.dataset.dia);
+      } else if (e.target.closest("[data-calendario]")) {
+        try {
+          input.showPicker();
+        } catch (err) { // navegador sin showPicker: se muestra el campo de fecha común
+          input.classList.remove("dia-input");
+          input.focus();
+        }
+      }
+    });
+    input.addEventListener("change", function () {
+      if (input.value) irADia(input.value);
+    });
+  }
+
   function iniciarAvisoDeConexion() {
     var aviso = document.getElementById("aviso-conexion");
     if (!aviso) return;
@@ -202,9 +239,22 @@
     });
   }
 
+  function iniciarCopiar() {
+    document.addEventListener("click", function (e) {
+      var boton = e.target.closest("[data-copiar]");
+      if (!boton || !navigator.clipboard) return;
+      navigator.clipboard.writeText(boton.dataset.copiar).then(function () {
+        boton.textContent = "Copiado";
+        window.setTimeout(function () { boton.textContent = "Copiar"; }, 1600);
+      });
+    });
+  }
+
   document.body.addEventListener("htmx:afterSwap", aplicar);
   iniciarHoy();
+  iniciarDia();
   iniciarAvisoDeConexion();
   iniciarDescarga();
   iniciarConfiguracion();
+  iniciarCopiar();
 })();

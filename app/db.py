@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS marcaciones (
   verificacion INTEGER,
   raw TEXT NOT NULL,         -- línea original del reloj
   recibido TEXT NOT NULL,    -- timestamp de la PC al recibirla
+  anulada TEXT,              -- timestamp de la PC si se anuló a mano (NULL: cuenta)
   UNIQUE (sn, pin, fecha_hora)
 );
 CREATE INDEX IF NOT EXISTS idx_marcaciones_fecha ON marcaciones (fecha_hora);
@@ -71,7 +72,19 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
   conn = sqlite3.connect(path or DB_PATH, timeout=10)
   conn.row_factory = sqlite3.Row
   conn.executescript(_SCHEMA)
+  _migrar(conn)
   return conn
+
+
+def _migrar(conn: sqlite3.Connection) -> None:
+  """Agrega las columnas nuevas a una base creada por una versión anterior."""
+  columnas = {c["name"] for c in conn.execute("PRAGMA table_info(marcaciones)")}
+  if "anulada" not in columnas:
+    try:
+      conn.execute("ALTER TABLE marcaciones ADD COLUMN anulada TEXT")
+      conn.commit()
+    except sqlite3.OperationalError:  # otra conexión la agregó al mismo tiempo
+      pass
 
 
 def insert_marcaciones(sn: str, marcaciones: list, path: Path | None = None) -> int:
@@ -115,7 +128,7 @@ def upsert_empleados(sn: str, usuarios: list, path: Path | None = None) -> int:
 def listar_marcaciones(desde: str | None = None, hasta: str | None = None,
                        pin: str | None = None, limite: int = 500,
                        path: Path | None = None) -> tuple[list[sqlite3.Row], bool]:
-  """Marcaciones más nuevas primero, con el nombre del empleado si existe.
+  """Marcaciones más nuevas primero (anuladas incluidas), con el nombre del empleado si existe.
 
   `desde`/`hasta`: fechas YYYY-MM-DD inclusivas. Devuelve (filas, truncado): `truncado` es
   True si había más de `limite` filas.
@@ -131,7 +144,7 @@ def listar_marcaciones(desde: str | None = None, hasta: str | None = None,
     where.append("m.pin = ?")
     params.append(pin)
   sql = (
-    "SELECT m.fecha_hora, m.pin, e.nombre, m.verificacion, m.sn"
+    "SELECT m.id, m.fecha_hora, m.pin, e.nombre, m.verificacion, m.sn, m.anulada"
     " FROM marcaciones m LEFT JOIN empleados e ON e.pin = m.pin"
     + (" WHERE " + " AND ".join(where) if where else "")  # solo fragmentos fijos con ?
     + " ORDER BY m.fecha_hora DESC, m.id DESC LIMIT ?"
@@ -139,6 +152,24 @@ def listar_marcaciones(desde: str | None = None, hasta: str | None = None,
   with closing(connect(path)) as conn:
     filas = conn.execute(sql, [*params, limite + 1]).fetchall()
   return filas[:limite], len(filas) > limite
+
+
+def anular_marcacion(marcacion_id: int, anular: bool = True, path: Path | None = None) -> bool:
+  """Anula (o restaura, con `anular=False`) una marcación. No se borra nunca: queda en la base
+  para que el reloj no pueda volver a cargarla y para poder restaurarla.
+
+  Devuelve False si no existe o ya estaba en ese estado.
+  """
+  with closing(connect(path)) as conn, conn:
+    if anular:
+      cur = conn.execute(
+        "UPDATE marcaciones SET anulada = ? WHERE id = ? AND anulada IS NULL",
+        (_ts(), marcacion_id))
+    else:
+      cur = conn.execute(
+        "UPDATE marcaciones SET anulada = NULL WHERE id = ? AND anulada IS NOT NULL",
+        (marcacion_id,))
+    return cur.rowcount == 1
 
 
 def listar_pins(path: Path | None = None) -> list[sqlite3.Row]:
@@ -158,7 +189,8 @@ _SQL_EMPLEADOS = (
   " c.id AS cmd_id, c.tipo AS cmd_tipo, c.estado AS cmd_estado, c.codigo_retorno AS cmd_codigo,"
   " COALESCE(c.tipo = 'baja' AND c.estado IN ('pendiente', 'enviado'), 0) AS baja_pendiente"
   " FROM empleados e"
-  " LEFT JOIN (SELECT pin, COUNT(*) AS total FROM marcaciones GROUP BY pin) m ON m.pin = e.pin"
+  " LEFT JOIN (SELECT pin, COUNT(*) AS total FROM marcaciones WHERE anulada IS NULL"
+  " GROUP BY pin) m ON m.pin = e.pin"
   " LEFT JOIN comandos c ON c.id = (SELECT MAX(id) FROM comandos WHERE pin = e.pin)"
 )
 

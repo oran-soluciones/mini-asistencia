@@ -45,4 +45,64 @@
   </div>
 </form>
 <form id="quitar-logo" method="post" action="/configuracion/logo/quitar" hidden></form>
+
+{% set r = estado_reloj() %}
+<section class="config conectar" id="conectar-reloj" aria-labelledby="titulo-conectar">
+  <h2 id="titulo-conectar">Conectar el reloj</h2>
+  <p class="ayuda">El reloj manda las marcaciones a esta PC por la red. Hay que cargarle la dirección y el puerto de abajo, y dejar la PC lista una sola vez.</p>
+
+  <div class="datos-conexion">
+    <div class="dato">
+      <span class="etiqueta">Dirección del servidor (IP de esta PC)</span>
+      {% if ips %}
+      <span class="valor num">{{ ips[0] }}</span>
+      {% if ips|length > 1 %}<span class="ayuda">Esta PC tiene más de una red. Otras IP: {{ ips[1:]|join(", ") }}. Usá la que esté en la misma red que el reloj.</span>{% endif %}
+      {% else %}
+      <span class="valor suave">No se encontró</span>
+      <span class="ayuda">La PC no parece estar conectada a una red. Conectala al Wi-Fi del reloj y recargá esta página.</span>
+      {% endif %}
+    </div>
+    <div class="dato">
+      <span class="etiqueta">Puerto</span>
+      <span class="valor num">{{ puerto }}</span>
+    </div>
+    <div class="dato">
+      <span class="etiqueta">Estado</span>
+      {% if r.conectado %}<span class="estado est-ok">Reloj conectado</span>
+      {% elif r.reloj %}<span class="estado est-pendiente">Sin contacto hace {{ r.hace }}</span>
+      {% else %}<span class="estado est-pendiente">Todavía no se conectó</span>{% endif %}
+    </div>
+  </div>
+
+  <h3>1. En el reloj</h3>
+  <ol class="pasos">
+    <li>Entrá al menú con un usuario administrador y abrí <strong>Comunicación</strong> → <strong>Config SVR de nube</strong> (en inglés, <em>Cloud Server Setting</em>).</li>
+    <li>Modo del servidor: <strong>ADMS</strong>. Si pregunta por nombre de dominio, dejalo <strong>desactivado</strong>.</li>
+    <li>Dirección del servidor: <strong class="num">{{ ips[0] if ips else "la IP de esta PC" }}</strong> · Puerto: <strong class="num">{{ puerto }}</strong>. Proxy: desactivado.</li>
+    <li>Guardá. En unos segundos el indicador de la barra de arriba tiene que decir <strong>Reloj conectado</strong>; si no, reiniciá el reloj.</li>
+  </ol>
+  <p class="ayuda">Los nombres del menú pueden variar un poco según el firmware del reloj.</p>
+
+  <h3>2. En esta PC (una sola vez)</h3>
+  <p class="ayuda">Abrí <strong>PowerShell como administrador</strong> (clic derecho en Inicio → Terminal (administrador) o Windows PowerShell (administrador)) y pegá cada comando.</p>
+  {% for titulo, comando, explicacion in comandos %}
+  <div class="comando-paso">
+    <span class="etiqueta">{{ titulo }}</span>
+    <div class="comando">
+      <code>{{ comando }}</code>
+      <button type="button" class="btn btn-chico" data-copiar="{{ comando }}">Copiar</button>
+    </div>
+    <p class="ayuda">{{ explicacion }}</p>
+  </div>
+  {% endfor %}
+
+  <h3>3. Para que siga andando</h3>
+  <ul class="pasos">
+    <li><strong>IP fija:</strong> el reloj apunta a una IP. Pedí en el router una <em>reserva DHCP</em> para esta PC; si la IP cambia, hay que volver a cargarla en el reloj.</li>
+    <li><strong>Este programa abierto:</strong> el reloj guarda las marcaciones mientras la PC está apagada y las manda todas juntas cuando vuelve. Para que arranque solo al prender la PC: clic derecho en el ícono del reloj en la bandeja (al lado de la hora de Windows) → <strong>Iniciar con Windows</strong>.</li>
+    <li><strong>Primera vez:</strong> Windows puede preguntar si permite el acceso de mini-asistencia a la red. Marcá <strong>Redes privadas</strong> y tocá <strong>Permitir</strong>.</li>
+    <li><strong>No abrir ZKBio Time a la vez:</strong> usan el mismo puerto y el reloj le hablaría a uno solo.</li>
+    <li><strong>Hora del reloj:</strong> revisá que coincida con la de la PC (menú Sistema → Fecha y hora).</li>
+  </ul>
+</section>
 {% endblock %}

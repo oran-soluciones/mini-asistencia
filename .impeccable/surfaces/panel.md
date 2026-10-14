@@ -19,8 +19,8 @@ como una franja horaria por persona, no como una tabla de eventos. Rechaza el da
 de tarjetas con números grandes y la tabla gris con un acento azul.
 
 OWN-WORLD: Mundo escolar argentino tomado solo en tipo, paleta, densidad y una firma. Shell en
-verde pizarrón profundo (`#1d3a33`) con texto tiza (`#eef2ec`); fondo de trabajo blanco frío
-apenas verdoso (`#f5f7f4`), superficies blancas; tinta de birome azul (`#2747b8`) para acciones,
+negro suave (`#262626`) con texto tiza (`#f2f2f2`); fondo de trabajo blanco frío
+neutro (`#f5f5f5`), superficies blancas; tinta de birome azul (`#2747b8`) para acciones,
 enlaces, selección y foco. Estados: "En el colegio" verde (`#1f7a4a`), "Se retiró" pizarra
 (`#4a5a68`), "Sin marcar" ámbar (`#a5650a`), peligro rojo (`#b42318`); siempre texto + color, nunca
 color solo. Tipografía del sistema (Segoe UI Variable / Segoe UI / system-ui), una familia, escala
@@ -32,7 +32,7 @@ en el colegio, cuántos se retiraron y cuántos no marcaron; busca un nombre o f
 ve su entrada, su salida y las horas. Dirección entiende la situación sin tocar nada. A fin de
 mes se exporta un Excel que ya se ve como un documento del colegio.
 
-FIRST VIEWPORT (Hoy, 1440x900): barra superior verde pizarrón: a la izquierda logo + nombre del
+FIRST VIEWPORT (Hoy, 1440x900): barra superior negro suave: a la izquierda logo + nombre del
 colegio (o el estado vacío), navegación Hoy · Marcaciones · Empleados · Configuración, a la
 derecha el indicador del reloj (punto + "Reloj conectado · hace 3 s"). Debajo, en el fondo claro:
 título con la fecha larga ("Martes 13 de octubre"), y a su derecha la hora actual. Luego una barra
@@ -43,8 +43,8 @@ Acción primaria de la vista: ninguna destructiva; exportar vive en Marcaciones.
 
 SIGNATURE: "La jornada" — cada fila tiene una franja horizontal sobre la escala de 07:00 a 19:00
 (marcas de hora tenues en el encabezado de la columna): un tramo sólido de entrada a salida, o de
-entrada a ahora (con el extremo abierto y pulsando suave) si sigue en el colegio; las marcaciones
-intermedias como ticks finos; una línea vertical "ahora" cruza todas las filas. Cuando llega una
+entrada a ahora (con el extremo abierto y pulsando suave) si sigue en el colegio; un tramo por
+cada par entrada-salida (el hueco muestra cuándo salió); una línea vertical "ahora" cruza todas las filas. Cuando llega una
 marcación nueva por el refresco, la hora de esa fila se "entinta": aparece con un relleno de
 tinta azul que se desvanece en 1.2 s (ease-out exponencial), solo en esa celda. Respeta
 `prefers-reduced-motion` (sin pulso ni entintado animado, solo el estado final).
@@ -58,13 +58,13 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 ## Resto de las vistas (heredan el mundo)
 
 - Marcaciones: filtros (desde, hasta, empleado) en una barra; columna "Tipo" con Entrada / Salida /
-  Intermedia / Repetida según la misma regla del Excel (primera = entrada, última = salida,
-  < 2 min = repetida); botón "Exportar a Excel" como acción primaria con ícono.
+  Repetida / Anulada según la misma regla del Excel (de a pares por día: 1.ª entrada, 2.ª salida...,
+  < 2 min = repetida); botón Anular / Restaurar por fila; botón "Exportar a Excel" como acción primaria con ícono.
 - Empleados: alta como formulario en línea arriba de la planilla (no modal), estados de comando
   como chips con texto, indicador del reloj ya está en la barra; "Últimos comandos" plegable.
 - Configuración: nombre del colegio y logo (PNG/JPG/SVG, máx. 1 MB) con vista previa.
 - Excel: hoja "Resumen por día" y "Detalle" con encabezado de documento: logo + nombre del
-  colegio + "Asistencia del personal" + rango y fecha de emisión; fila de títulos verde pizarrón
+  colegio + "Asistencia del personal" + rango y fecha de emisión; fila de títulos negro suave
   con texto blanco, filas cebra muy suaves, estado/observación en ámbar cuando corresponde,
   totales en negrita, configurado para imprimir (A4 horizontal, ajustar a 1 página de ancho,
   repetir títulos, pie con página N de M).

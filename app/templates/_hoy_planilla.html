@@ -1,5 +1,5 @@
 {% from "_iconos.html" import ico %}
-<div id="hoy-planilla" class="planilla" hx-get="/hoy/tabla" hx-trigger="every 5s" hx-swap="outerHTML">
+<div id="hoy-planilla" class="planilla" hx-get="{{ refresco }}" hx-trigger="every 5s" hx-swap="outerHTML">
   {% if not vista.filas %}
   <div class="vacio-grande">
     {{ ico("empleados") }}
@@ -8,7 +8,7 @@
   </div>
   {% else %}
   {% if nadie_marco %}
-  <p class="nota">{{ ico("info") }}<span>Todavía nadie marcó hoy. Las marcaciones aparecen solas apenas llegan del reloj.</span></p>
+  <p class="nota">{{ ico("info") }}<span>{% if es_hoy %}Todavía nadie marcó hoy. Las marcaciones aparecen solas apenas llegan del reloj.{% else %}Ese día nadie marcó.{% endif %}</span></p>
   {% endif %}
   <table class="hoy-tabla{% if vista.ahora_pct is none %} sin-ahora{% endif %}"{% if vista.ahora_pct is not none %} style="--ahora: {{ vista.ahora_pct }}%"{% endif %}>
     <thead>
@@ -18,13 +18,7 @@
         <th scope="col" class="c-hora">Entrada</th>
         <th scope="col" class="c-hora">Salida</th>
         <th scope="col" class="c-horas">Horas</th>
-        <th scope="col" class="c-jornada">
-          <span class="jornada-titulo">La jornada</span>
-          <span class="escala" role="img" aria-label="Escala de 07:00 a 19:00 horas">
-            {%- for h in MARCAS_HORA %}<span class="marca-hora" style="left: {{ (h - INICIO_HORA) * 100 / ESCALA_HORAS }}%">{{ "%02d"|format(h) }}</span>{% endfor -%}
-            {%- if vista.ahora_pct is not none %}<span class="escala-ahora" style="left: {{ vista.ahora_pct }}%" title="Ahora: {{ hora }}"></span>{% endif -%}
-          </span>
-        </th>
+        <th scope="col" class="c-jornada">Horarios</th>
       </tr>
     </thead>
     <tbody>
@@ -37,7 +31,7 @@
           <span class="nombre">PIN {{ f.pin }} · sin nombre</span><span class="sub">No figura en Empleados</span>
           {%- endif -%}
         </td>
-        <td class="c-estado"><span class="chip est-{{ f.estado }}"><span class="punto" aria-hidden="true"></span>{{ ESTADOS[f.estado] }}</span></td>
+        <td class="c-estado"><span class="chip est-{{ f.estado }}"><span class="punto" aria-hidden="true"></span>{{ estados[f.estado] }}</span></td>
         <td class="c-hora c-entrada" data-label="Entrada">{% if f.entrada %}{{ fmt_hm(f.entrada) }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">sin dato</span>{% endif %}</td>
         <td class="c-hora c-salida" data-label="Salida">{% if f.salida %}{{ fmt_hm(f.salida) }}{% else %}<span aria-hidden="true">–</span><span class="sr-only">sin dato</span>{% endif %}</td>
         <td class="c-horas" data-label="{{ 'Hasta ahora' if f.horas_parcial else 'Horas' }}">
@@ -47,8 +41,8 @@
         </td>
         <td class="c-jornada" aria-hidden="true">
           <div class="franja">
-            {%- if f.tramo %}<span class="tramo{{ ' abierto' if f.tramo.abierto }}{{ ' rec-izq' if f.tramo.recorte_izq }}{{ ' rec-der' if f.tramo.recorte_der }}" style="left: {{ f.tramo.izq }}%; width: {{ f.tramo.ancho }}%"></span>{% endif -%}
-            {%- for t in f.ticks %}<span class="tick" style="left: {{ t }}%"></span>{% endfor -%}
+            {%- for t in f.tramos %}<span class="tramo{{ ' abierto' if t.abierto }}{{ ' rec-izq' if t.recorte_izq }}{{ ' rec-der' if t.recorte_der }}{{ ' falta' if t.falta }}" style="left: {{ t.izq }}%; width: {{ t.ancho }}%"></span>{% endfor -%}
+            {%- for h in MARCAS_HORA %}<span class="marca-hora" style="left: {{ (h - INICIO_HORA) * 100 / ESCALA_HORAS }}%">{{ "%02d"|format(h) }}</span>{% endfor -%}
           </div>
         </td>
       </tr>

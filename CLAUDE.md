@@ -44,6 +44,14 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 
 - Variables de entorno (pruebas manuales sin tocar los datos reales): `MINI_ASISTENCIA_PORT`,
   `MINI_ASISTENCIA_DATA_DIR` (base + logs) y `MINI_ASISTENCIA_SAMPLES_DIR`.
+- Empaquetado (etapa 6): `mini-asistencia.spec` → `dist\mini-asistencia.exe` (un archivo, sin consola):
+  `.venv\Scripts\python.exe -m pip install -r requirements-build.txt` y
+  `.venv\Scripts\python.exe -m PyInstaller mini-asistencia.spec --noconfirm`. Lo mismo hace
+  `.github/workflows/build-windows.yml` (tests + .exe como artifact; con un tag `v*`, Release).
+  `app/main.py`: si ya está abierto solo abre el navegador; si el puerto es de otro programa avisa;
+  bandeja con Abrir panel / Iniciar con Windows (HKCU\...\Run, con `--sin-navegador`) / Carpeta
+  de datos / Salir. `--sin-bandeja` para pruebas. Log rotativo (10 x 5 MB). En el .exe los samples
+  van a la carpeta de datos, y el getrequest de rutina (OK, sin INFO) no se guarda como sample.
 - Panel: solo responde a 127.0.0.1 / ::1 (403 al resto); abrirlo con `http://localhost:<puerto>/`,
   no con la IP de la PC. `/iclock/*` y cualquier ruta desconocida siguen abiertos (los captura
   el espía). El router del panel va ANTES que el de iclock (ver `app/main.py`).
@@ -58,9 +66,14 @@ Usar `pathlib` para todas las rutas (compatibilidad Windows/Linux).
 - No asumir campos del protocolo sin verificarlos contra lo que realmente manda el reloj.
   Si algo no está en `samples/`, se marca como "no verificado".
 - Las marcaciones nunca se pierden ni se duplican: clave única (SN, PIN, fecha-hora).
-- Reporte Excel (`/marcaciones/excel`, `app/reports.py`): Horas = última - primera marcación del día
-  (solo entrada/salida; no contempla almuerzo, turnos ni horarios ni cruza la medianoche). Marcaciones
-  a menos de 2 min de la anterior se ignoran y se anotan en Observación.
+- Jornada (`app/jornada.py`, la misma regla para Hoy, el panel y el Excel): las marcaciones válidas de
+  cada día van de a pares (1.ª entrada, 2.ª salida, 3.ª entrada...); cada día empieza con una entrada.
+  Horas = suma de los pares completos (no contempla turnos ni horarios ni cruza la medianoche).
+  Marcaciones a menos de 2 min de la anterior se ignoran (repetidas) y se anotan en Observación.
+- Anular marcaciones (panel, Marcaciones): no se borran nunca; la columna `anulada` las saca de la
+  jornada (las demás se reacomodan) y se pueden restaurar. El reloj no puede volver a cargarlas.
+- Reporte Excel (`/marcaciones/excel`, `app/reports.py`): hojas Resumen por día (una columna
+  Entrada/Salida por par), Línea de tiempo (franjas de 15 min pintadas), Detalle e Info.
 - Los datos del usuario (SQLite, logs) van en una carpeta de datos del usuario
   (en Windows `%LOCALAPPDATA%\mini-asistencia`), nunca al lado del `.exe`.
 - Esperar aprobación del usuario antes de empezar cada etapa.

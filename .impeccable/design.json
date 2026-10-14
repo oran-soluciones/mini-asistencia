@@ -71,7 +71,7 @@
       "pizarra": {
         "role": "secondary",
         "displayName": "Verde pizarrón",
-        "canonical": "#1d3a33",
+        "canonical": "#262626",
         "oklch": "oklch(32.3% 0.038 176.4)",
         "tonalRamp": [
           "oklch(15% 0.038 176.4)",
@@ -87,7 +87,7 @@
       "tiza": {
         "role": "secondary",
         "displayName": "Tiza",
-        "canonical": "#eef2ec",
+        "canonical": "#f2f2f2",
         "oklch": "oklch(95.6% 0.009 134.9)",
         "tonalRamp": [
           "oklch(15% 0.009 134.9)",
@@ -103,7 +103,7 @@
       "tiza-suave": {
         "role": "secondary",
         "displayName": "Tiza suave",
-        "canonical": "#b9cbc1",
+        "canonical": "#bdbdbd",
         "oklch": "oklch(82.6% 0.024 161.6)",
         "tonalRamp": [
           "oklch(15% 0.024 161.6)",
@@ -231,7 +231,7 @@
       "fondo": {
         "role": "neutral",
         "displayName": "Blanco frío",
-        "canonical": "#f5f7f4",
+        "canonical": "#f5f5f5",
         "oklch": "oklch(97.4% 0.004 134.8)",
         "tonalRamp": [
           "oklch(15% 0.004 134.8)",
@@ -263,7 +263,7 @@
       "superficie-2": {
         "role": "neutral",
         "displayName": "Superficie 2",
-        "canonical": "#edf1ed",
+        "canonical": "#eeeeee",
         "oklch": "oklch(95.4% 0.007 145.5)",
         "tonalRamp": [
           "oklch(15% 0.007 145.5)",
@@ -279,7 +279,7 @@
       "borde": {
         "role": "neutral",
         "displayName": "Borde",
-        "canonical": "#d6ded7",
+        "canonical": "#d9d9d9",
         "oklch": "oklch(89.2% 0.013 149.2)",
         "tonalRamp": [
           "oklch(15% 0.013 149.2)",
@@ -295,7 +295,7 @@
       "borde-fuerte": {
         "role": "neutral",
         "displayName": "Borde fuerte",
-        "canonical": "#b3c0b6",
+        "canonical": "#b8b8b8",
         "oklch": "oklch(79.5% 0.020 152.7)",
         "tonalRamp": [
           "oklch(15% 0.020 152.7)",
@@ -311,7 +311,7 @@
       "borde-control": {
         "role": "neutral",
         "displayName": "Borde de control",
-        "canonical": "#7f8f84",
+        "canonical": "#878787",
         "oklch": "oklch(63.4% 0.025 155.6)",
         "tonalRamp": [
           "oklch(15% 0.025 155.6)",
@@ -327,7 +327,7 @@
       "texto": {
         "role": "neutral",
         "displayName": "Texto",
-        "canonical": "#1b2420",
+        "canonical": "#1f1f1f",
         "oklch": "oklch(25.0% 0.015 166.3)",
         "tonalRamp": [
           "oklch(15% 0.015 166.3)",
@@ -343,7 +343,7 @@
       "suave": {
         "role": "neutral",
         "displayName": "Suave",
-        "canonical": "#566159",
+        "canonical": "#5c5c5c",
         "oklch": "oklch(48.1% 0.019 154.1)",
         "tonalRamp": [
           "oklch(15% 0.019 154.1)",
@@ -541,7 +541,7 @@
         "chevron",
         "subir"
       ],
-      "appIcon": "app/static/icono.svg: círculo pizarrón (#1d3a33) con agujas de reloj en tiza (#eef2ec), trazo 2.5"
+      "appIcon": "app/static/icono.svg: círculo pizarrón (#262626) con agujas de reloj en tiza (#f2f2f2), trazo 2.5"
     },
     "signature": {
       "name": "La jornada",
@@ -561,8 +561,8 @@
         "Info"
       ],
       "palette": {
-        "verde": "#1D3A33",
-        "texto": "#1B2420",
+        "verde": "#262626",
+        "texto": "#1f1f1f",
         "suave": "#59655F",
         "cebra": "#F3F6F2",
         "borde": "#DDE3DD",
@@ -570,8 +570,8 @@
         "ambar-texto": "#7A4A00",
         "tipo-entrada": "#1F7A4A",
         "tipo-salida": "#4A5A68",
-        "tipo-intermedia": "#1B2420",
-        "tipo-repetida": "#6B756F (cursiva)"
+        "tipo-intermedia": "#1f1f1f",
+        "tipo-repetida": "#707070 (cursiva)"
       },
       "header": "Filas 1-3: logo PNG/JPG máx. 150x52 px en A-B (SVG no se inserta); colegio 16pt negrita verde (fila 26pt); 'Asistencia del personal' 12pt negrita suave (19pt); período · empleado · emisión 10pt suave (17pt). Fila 4 de 8pt.",
       "titles": "Fila 5 (24pt): fondo verde, texto blanco negrita; centradas fecha/hora/PIN/cantidades, resto a la izquierda con sangría 1; paneles congelados y autofiltro",
@@ -588,7 +588,7 @@
       "refersTo": "button-primario",
       "description": "La acción principal de la vista (Exportar a Excel, Agregar empleado, Guardar). Uno por vista.",
       "html": "<button class=\"ds-btn ds-btn-primario\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"4\" y=\"3.5\" width=\"16\" height=\"17\" rx=\"2\"/><path d=\"M4 9.5h16M4 15h16M10 9.5v11\"/></svg><span>Exportar a Excel</span></button>",
-      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s; } .ds-ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn:active { transform: translateY(1px); } .ds-btn-primario { background: #2747b8; border-color: #2747b8; color: #fff; } .ds-btn-primario:hover { background: #1f3a99; border-color: #1f3a99; } .ds-btn-primario:active { background: #182e7a; border-color: #182e7a; }"
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #878787; border-radius: 8px; background: #fff; color: #1f1f1f; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.1s; } .ds-ico { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn:active { transform: translateY(1px); } .ds-btn-primario { background: #2747b8; border-color: #2747b8; color: #fff; } .ds-btn-primario:hover { background: #1f3a99; border-color: #1f3a99; } .ds-btn-primario:active { background: #182e7a; border-color: #182e7a; }"
     },
     {
       "name": "Botón",
@@ -596,7 +596,7 @@
       "refersTo": "button",
       "description": "Acción secundaria con contorno (Filtrar, Editar).",
       "html": "<button class=\"ds-btn\">Filtrar</button>",
-      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, transform 0.1s; } .ds-btn:hover { background: #edf1ed; border-color: #5f7166; } .ds-btn:active { background: #e1e8e2; transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #878787; border-radius: 8px; background: #fff; color: #1f1f1f; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, transform 0.1s; } .ds-btn:hover { background: #eeeeee; border-color: #666666; } .ds-btn:active { background: #e3e3e3; transform: translateY(1px); } .ds-btn:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
     },
     {
       "name": "Botón de peligro (chico)",
@@ -604,7 +604,7 @@
       "refersTo": "button-peligro",
       "description": "Acción destructiva por fila: neutra en reposo, roja solo al apuntarla o enfocarla; siempre confirma.",
       "html": "<button class=\"ds-btn ds-btn-chico ds-btn-peligro\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v5M14 11v5\"/></svg><span>Dar de baja</span></button>",
-      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s; } .ds-btn-chico { height: 32px; padding: 0 10px; gap: 6px; font-size: 0.79rem; } .ds-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn-peligro:hover, .ds-btn-peligro:focus-visible { background: #fdeceb; border-color: #b42318; color: #b42318; } .ds-btn-peligro:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn-peligro:active { background: #f9d9d6; }"
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 16px; border: 1px solid #878787; border-radius: 8px; background: #fff; color: #1f1f1f; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, color 0.15s; } .ds-btn-chico { height: 32px; padding: 0 10px; gap: 6px; font-size: 0.79rem; } .ds-ico { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-btn-peligro:hover, .ds-btn-peligro:focus-visible { background: #fdeceb; border-color: #b42318; color: #b42318; } .ds-btn-peligro:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; } .ds-btn-peligro:active { background: #f9d9d6; }"
     },
     {
       "name": "Campo de texto",
@@ -612,7 +612,7 @@
       "refersTo": "input",
       "description": "Campo con etiqueta encima; foco en tinta, inválido en rojo.",
       "html": "<label class=\"ds-label\">Nombre <input class=\"ds-input\" type=\"text\" placeholder=\"Hasta 24 caracteres\"></label>",
-      "css": ".ds-label { display: inline-flex; flex-direction: column; gap: 4px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.79rem; font-weight: 600; color: #566159; } .ds-input { height: 40px; padding: 0 12px; border: 1px solid #7f8f84; border-radius: 8px; background: #fff; color: #1b2420; font: inherit; font-size: 0.889rem; font-weight: 400; transition: border-color 0.15s; } .ds-input::placeholder { color: #6b756f; } .ds-input:hover { border-color: #5f7166; } .ds-input:focus-visible { outline: 2px solid #2747b8; outline-offset: 0; border-color: #2747b8; } .ds-input:user-invalid { border-color: #b42318; }"
+      "css": ".ds-label { display: inline-flex; flex-direction: column; gap: 4px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.79rem; font-weight: 600; color: #5c5c5c; } .ds-input { height: 40px; padding: 0 12px; border: 1px solid #878787; border-radius: 8px; background: #fff; color: #1f1f1f; font: inherit; font-size: 0.889rem; font-weight: 400; transition: border-color 0.15s; } .ds-input::placeholder { color: #707070; } .ds-input:hover { border-color: #666666; } .ds-input:focus-visible { outline: 2px solid #2747b8; outline-offset: 0; border-color: #2747b8; } .ds-input:user-invalid { border-color: #b42318; }"
     },
     {
       "name": "Navegación (barra pizarrón)",
@@ -620,7 +620,7 @@
       "refersTo": "nav-item",
       "description": "Barra superior en verde pizarrón con ítems en tiza; el actual lleva subrayado inserto.",
       "html": "<nav class=\"ds-barra\"><a class=\"ds-nav\" href=\"#\" aria-current=\"page\">Hoy</a><a class=\"ds-nav\" href=\"#\">Marcaciones</a><a class=\"ds-nav\" href=\"#\">Empleados</a><span class=\"ds-reloj\"><span class=\"ds-punto\"></span><b>Reloj conectado</b> · hace 3 s</span></nav>",
-      "css": ".ds-barra { display: flex; align-items: center; gap: 4px; min-height: 68px; padding: 0 24px; background: #1d3a33; color: #eef2ec; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; } .ds-nav { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; color: #b9cbc1; font-weight: 550; text-decoration: none; transition: background-color 0.15s, color 0.15s; } .ds-nav:hover { background: rgb(238 242 236 / 0.1); color: #eef2ec; } .ds-nav:active { background: rgb(238 242 236 / 0.18); } .ds-nav:focus-visible { outline: 2px solid #aebdf5; outline-offset: 2px; } .ds-nav[aria-current=\"page\"] { background: rgb(238 242 236 / 0.16); color: #fff; font-weight: 650; box-shadow: inset 0 -2px 0 #eef2ec; } .ds-reloj { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #b9cbc1; font-size: 0.79rem; } .ds-reloj b { color: #eef2ec; font-weight: 600; } .ds-punto { width: 8px; height: 8px; border-radius: 50%; background: #6fd49b; }"
+      "css": ".ds-barra { display: flex; align-items: center; gap: 4px; min-height: 68px; padding: 0 24px; background: #262626; color: #f2f2f2; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; } .ds-nav { display: inline-flex; align-items: center; height: 40px; padding: 0 14px; border-radius: 8px; color: #bdbdbd; font-weight: 550; text-decoration: none; transition: background-color 0.15s, color 0.15s; } .ds-nav:hover { background: rgb(242 242 242 / 0.1); color: #f2f2f2; } .ds-nav:active { background: rgb(242 242 242 / 0.18); } .ds-nav:focus-visible { outline: 2px solid #aebdf5; outline-offset: 2px; } .ds-nav[aria-current=\"page\"] { background: rgb(242 242 242 / 0.16); color: #fff; font-weight: 650; box-shadow: inset 0 -2px 0 #f2f2f2; } .ds-reloj { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #bdbdbd; font-size: 0.79rem; } .ds-reloj b { color: #f2f2f2; font-weight: 600; } .ds-punto { width: 8px; height: 8px; border-radius: 50%; background: #6fd49b; }"
     },
     {
       "name": "Chip de estado",
@@ -636,7 +636,7 @@
       "refersTo": "segmentos",
       "description": "El resumen del día que también filtra la planilla de Hoy.",
       "html": "<div class=\"ds-seg\" role=\"group\"><button class=\"ds-s\" aria-pressed=\"true\">Todos <b>42</b></button><button class=\"ds-s\"><i style=\"background:#1f7a4a\"></i>En el colegio <b>30</b></button><button class=\"ds-s\"><i style=\"background:#4a5a68\"></i>Se retiraron <b>4</b></button><button class=\"ds-s\"><i style=\"background:#a5650a\"></i>Sin marcar <b>8</b></button></div>",
-      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; background: #edf1ed; border: 1px solid #d6ded7; border-radius: 10px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-s { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #566159; font: inherit; font-size: 0.889rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-s i { width: 8px; height: 8px; border-radius: 50%; } .ds-s b { color: #1b2420; font-weight: 700; } .ds-s:hover { background: rgb(255 255 255 / 0.7); color: #1b2420; } .ds-s[aria-pressed=\"true\"] { background: #fff; border-color: #b3c0b6; color: #1b2420; } .ds-s:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; background: #eeeeee; border: 1px solid #d9d9d9; border-radius: 10px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-s { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #5c5c5c; font: inherit; font-size: 0.889rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-s i { width: 8px; height: 8px; border-radius: 50%; } .ds-s b { color: #1f1f1f; font-weight: 700; } .ds-s:hover { background: rgb(255 255 255 / 0.7); color: #1f1f1f; } .ds-s[aria-pressed=\"true\"] { background: #fff; border-color: #b8b8b8; color: #1f1f1f; } .ds-s:focus-visible { outline: 2px solid #2747b8; outline-offset: 2px; }"
     },
     {
       "name": "La jornada (fila de Hoy)",
@@ -644,7 +644,7 @@
       "refersTo": "tramo",
       "description": "Firma del sistema: franja horaria 07:00-19:00 por persona, con tramo, tick intermedio, línea 'ahora' y el tramo abierto que respira.",
       "html": "<div class=\"ds-fila\"><span class=\"ds-nombre\">Ana Pérez<small>PIN 12</small></span><span class=\"ds-hora ds-entintado\">07:42</span><div class=\"ds-franja\" style=\"--ahora: 52%\"><span class=\"ds-tramo ds-abierto\" style=\"left: 6%; width: 46%\"></span><span class=\"ds-tick\" style=\"left: 30%\"></span></div></div>",
-      "css": ".ds-fila { display: grid; grid-template-columns: 160px 70px 1fr; align-items: center; height: 48px; padding: 0 14px; background: #fff; border: 1px solid #d6ded7; border-radius: 12px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #1b2420; } .ds-nombre { font-size: 1rem; font-weight: 600; line-height: 1.25; } .ds-nombre small { display: block; color: #566159; font-size: 0.79rem; font-weight: 400; } .ds-hora { justify-self: start; padding: 2px 6px; border-radius: 6px; font-size: 1rem; } .ds-entintado { animation: ds-entintar 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate; } @keyframes ds-entintar { from { background-color: rgb(39 71 184 / 0.28); } to { background-color: transparent; } } .ds-franja { position: relative; height: 100%; background: linear-gradient(#b3c0b6, #b3c0b6) center / 100% 1px no-repeat, linear-gradient(90deg, #b3c0b6 1px, transparent 1px) left center / calc((100% - 1px) / 12) 7px repeat-x; } .ds-franja::after { content: \"\"; position: absolute; left: var(--ahora); top: 0; bottom: 0; width: 1.5px; background: #2747b8; } .ds-tramo { position: absolute; top: 50%; height: 10px; min-width: 6px; translate: 0 -50%; border-radius: 3px; background: #1f7a4a; } .ds-abierto { border-radius: 3px 0 0 3px; } .ds-abierto::after { content: \"\"; position: absolute; inset: 0 0 0 auto; width: 10px; background: #fff; opacity: 0; animation: ds-respira 2.4s ease-in-out infinite; } @keyframes ds-respira { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } } .ds-tick { position: absolute; top: 50%; width: 2px; height: 20px; margin-left: -1px; translate: 0 -50%; border-radius: 1px; background: #1b2420; outline: 1.5px solid #fff; } @media (prefers-reduced-motion: reduce) { .ds-entintado, .ds-abierto::after { animation: none; } }"
+      "css": ".ds-fila { display: grid; grid-template-columns: 160px 70px 1fr; align-items: center; height: 48px; padding: 0 14px; background: #fff; border: 1px solid #d9d9d9; border-radius: 12px; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-variant-numeric: tabular-nums; color: #1f1f1f; } .ds-nombre { font-size: 1rem; font-weight: 600; line-height: 1.25; } .ds-nombre small { display: block; color: #5c5c5c; font-size: 0.79rem; font-weight: 400; } .ds-hora { justify-self: start; padding: 2px 6px; border-radius: 6px; font-size: 1rem; } .ds-entintado { animation: ds-entintar 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate; } @keyframes ds-entintar { from { background-color: rgb(39 71 184 / 0.28); } to { background-color: transparent; } } .ds-franja { position: relative; height: 100%; background: linear-gradient(#b8b8b8, #b8b8b8) center / 100% 1px no-repeat, linear-gradient(90deg, #b8b8b8 1px, transparent 1px) left center / calc((100% - 1px) / 12) 7px repeat-x; } .ds-franja::after { content: \"\"; position: absolute; left: var(--ahora); top: 0; bottom: 0; width: 1.5px; background: #2747b8; } .ds-tramo { position: absolute; top: 50%; height: 10px; min-width: 6px; translate: 0 -50%; border-radius: 3px; background: #1f7a4a; } .ds-abierto { border-radius: 3px 0 0 3px; } .ds-abierto::after { content: \"\"; position: absolute; inset: 0 0 0 auto; width: 10px; background: #fff; opacity: 0; animation: ds-respira 2.4s ease-in-out infinite; } @keyframes ds-respira { 0%, 100% { opacity: 0; } 50% { opacity: 0.7; } } .ds-tick { position: absolute; top: 50%; width: 2px; height: 20px; margin-left: -1px; translate: 0 -50%; border-radius: 1px; background: #1f1f1f; outline: 1.5px solid #fff; } @media (prefers-reduced-motion: reduce) { .ds-entintado, .ds-abierto::after { animation: none; } }"
     },
     {
       "name": "Alerta",
@@ -652,7 +652,7 @@
       "refersTo": "formulario-en-linea",
       "description": "Aviso en caja de 8 px con ícono de color y texto neutro (variantes OK, aviso, error).",
       "html": "<p class=\"ds-alerta ds-aviso\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3.5L2.5 20h19L12 3.5zM12 10v4.5M12 17.2h.01\"/></svg><span>Se muestran solo las marcaciones más nuevas; hay más. Acotá el rango de fechas.</span></p>",
-      "css": ".ds-alerta { display: flex; align-items: flex-start; gap: 10px; max-width: 75ch; margin: 0; padding: 12px 14px; border: 1px solid #b3c0b6; border-radius: 8px; background: #fff; color: #1b2420; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; line-height: 1.5; } .ds-ico { width: 20px; height: 20px; flex: none; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-aviso { background: #fbf3e3; border-color: #e3cf9f; } .ds-aviso .ds-ico { color: #a5650a; }"
+      "css": ".ds-alerta { display: flex; align-items: flex-start; gap: 10px; max-width: 75ch; margin: 0; padding: 12px 14px; border: 1px solid #b8b8b8; border-radius: 8px; background: #fff; color: #1f1f1f; font-family: \"Segoe UI Variable Text\", \"Segoe UI\", system-ui, sans-serif; font-size: 0.889rem; line-height: 1.5; } .ds-ico { width: 20px; height: 20px; flex: none; margin-top: 1px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-aviso { background: #fbf3e3; border-color: #e3cf9f; } .ds-aviso .ds-ico { color: #a5650a; }"
     }
   ],
   "narrative": {

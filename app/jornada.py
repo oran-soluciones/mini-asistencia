@@ -1,9 +1,11 @@
 """La jornada del día: una sola regla para la vista Hoy, la columna Tipo y el Excel.
 
 Reglas (las mismas que documenta app/reports.py):
-- Primera marcación válida del día = entrada; última = salida. Las del medio son intermedias.
+- Las marcaciones válidas de cada día van de a pares: 1.ª entrada, 2.ª salida, 3.ª entrada,
+  4.ª salida... Cada día empieza de nuevo con una entrada. Horas = suma de los pares completos.
 - Una marcación a menos de 2 minutos de la última válida es repetida y se ignora.
-- Una sola válida: sigue en el colegio (sin salida). Ninguna: sin marcar.
+- Las anuladas a mano desde el panel no cuentan: las demás se reacomodan solas.
+- Cantidad impar de válidas: sigue en el colegio (falta la última salida). Ninguna: sin marcar.
 - No se cruza la medianoche: cada día calendario se analiza por separado.
 
 Todo son funciones puras (el "ahora" se inyecta), así se testean sin base ni reloj.
@@ -14,7 +16,7 @@ from typing import NamedTuple
 
 REPETIDA_MIN = timedelta(minutes=2)
 
-ENTRADA, SALIDA, INTERMEDIA, REPETIDA = "Entrada", "Salida", "Intermedia", "Repetida"
+ENTRADA, SALIDA, REPETIDA, ANULADA = "Entrada", "Salida", "Repetida", "Anulada"
 
 EN_COLEGIO, SE_RETIRO, SIN_MARCAR = "en_colegio", "se_retiro", "sin_marcar"
 ESTADOS = {EN_COLEGIO: "En el colegio", SE_RETIRO: "Se retiró", SIN_MARCAR: "Sin marcar"}
@@ -23,7 +25,7 @@ ESTADOS = {EN_COLEGIO: "En el colegio", SE_RETIRO: "Se retiró", SIN_MARCAR: "Si
 INICIO_MIN = 7 * 60
 FIN_MIN = 19 * 60
 ESCALA_MIN = FIN_MIN - INICIO_MIN
-MARCAS_HORA = list(range(7, 20, 2))  # 07 09 11 13 15 17 19 en el encabezado
+MARCAS_HORA = list(range(7, 20))  # 07 08 09 … 19, chiquitas arriba de cada marquita de la franja
 
 DIAS = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
@@ -37,15 +39,29 @@ class Jornada(NamedTuple):
 
   @property
   def entrada(self) -> datetime | None:
+    """Primera entrada del día."""
     return self.validas[0] if self.validas else None
 
   @property
-  def salida(self) -> datetime | None:
-    return self.validas[-1] if len(self.validas) > 1 else None
+  def abierta(self) -> bool:
+    """Cantidad impar de válidas: la última entrada todavía no tiene salida."""
+    return len(self.validas) % 2 == 1
 
   @property
-  def intermedias(self) -> list[datetime]:
-    return self.validas[1:-1]
+  def salida(self) -> datetime | None:
+    """Última salida, solo si se retiró (cada entrada tiene su salida)."""
+    return self.validas[-1] if self.validas and not self.abierta else None
+
+  @property
+  def pares(self) -> list[tuple[datetime, datetime | None]]:
+    """(entrada, salida) en orden; la última salida es None si sigue en el colegio."""
+    v = self.validas
+    return [(v[i], v[i + 1] if i + 1 < len(v) else None) for i in range(0, len(v), 2)]
+
+  @property
+  def horas(self) -> timedelta:
+    """Suma de los pares completos (el par abierto no suma)."""
+    return sum((s - e for e, s in self.pares if s), timedelta(0))
 
   @property
   def repetidas(self) -> int:
@@ -67,23 +83,31 @@ def analizar(momentos) -> Jornada:
     if not valida:
       tipos.append(REPETIDA)
       continue
+    tipos.append(ENTRADA if vistas % 2 == 0 else SALIDA)
     vistas += 1
-    if vistas == 1:
-      tipos.append(ENTRADA)
-    elif vistas == len(validas):
-      tipos.append(SALIDA)
-    else:
-      tipos.append(INTERMEDIA)
   return Jornada(orden, tipos, validas)
 
 
+def anulada(fila) -> bool:
+  """True si la marcación se anuló a mano (las filas sin la columna `anulada` no lo están)."""
+  try:
+    return bool(fila["anulada"])
+  except (KeyError, IndexError):
+    return False
+
+
 def tipos_de_marcaciones(filas) -> list[str]:
-  """Tipo de cada fila (`fecha_hora`, `pin`), en el mismo orden que `filas` (cualquiera)."""
+  """Tipo de cada fila (`fecha_hora`, `pin`), en el mismo orden que `filas` (cualquiera).
+
+  Los pares se arman por empleado y por día. Las anuladas son ANULADA y no cuentan.
+  """
   grupos: dict[tuple, list[tuple[datetime, int]]] = {}
+  tipos = [ANULADA] * len(filas)
   for i, f in enumerate(filas):
+    if anulada(f):
+      continue
     momento = datetime.fromisoformat(f["fecha_hora"])
     grupos.setdefault((momento.date(), f["pin"]), []).append((momento, i))
-  tipos = [""] * len(filas)
   for miembros in grupos.values():
     miembros.sort()
     jornada = analizar(m for m, _ in miembros)
@@ -130,21 +154,21 @@ class Tramo(NamedTuple):
   abierto: bool       # sigue en el colegio: extremo abierto
   recorte_izq: bool   # empezó antes de las 07:00
   recorte_der: bool   # termina después de las 19:00
+  falta: bool = False  # día pasado sin salida: solo se marca la entrada
 
 
 class FilaHoy(NamedTuple):
   pin: str
   nombre: str | None        # None: PIN con marcaciones que no figura en Empleados
   estado: str
-  entrada: datetime | None
-  salida: datetime | None
-  horas: timedelta | None   # salida - entrada, o (si sigue) ahora - entrada
+  entrada: datetime | None  # primera entrada del día
+  salida: datetime | None   # última salida (solo si se retiró)
+  horas: timedelta | None   # suma de los pares (si sigue en el colegio, el último hasta ahora)
   horas_parcial: bool       # True: son horas hasta ahora
   ultima: str               # fecha_hora de la última marcación válida ("" si no hay)
-  celda_nueva: str          # "entrada" | "salida": la celda donde cae `ultima`
+  celda_nueva: str          # "entrada" | "salida": la celda que se entinta al llegar `ultima`
   repetidas: int
-  tramo: Tramo | None
-  ticks: list[float]        # intermedias dentro de la franja, en %
+  tramos: list[Tramo]       # uno por par entrada-salida (el último abierto si sigue)
 
 
 class UltimaMarca(NamedTuple):
@@ -186,14 +210,18 @@ def _clave_nombre(texto: str) -> str:
   return "".join(c for c in base if not unicodedata.combining(c))
 
 
-def vista_hoy(empleados, marcaciones, ahora: datetime) -> VistaHoy:
-  """Arma la vista de hoy.
+def vista_hoy(empleados, marcaciones, ahora: datetime, en_curso: bool = True) -> VistaHoy:
+  """Arma la vista de un día (el de `ahora`).
 
-  `empleados`: filas con pin y nombre. `marcaciones`: filas con pin y fecha_hora de HOY
-  (los PIN que no están en `empleados` aparecen igual, sin nombre).
+  `empleados`: filas con pin y nombre. `marcaciones`: filas con pin y fecha_hora de ese día
+  (los PIN que no están en `empleados` aparecen igual, sin nombre; las anuladas no cuentan).
+  `en_curso`: False para un día pasado: quien no marcó la salida no suma horas "hasta ahora"
+  (su tramo es solo la entrada, marcado como falta) y no hay línea "ahora".
   """
   por_pin: dict[str, list[datetime]] = {}
   for m in marcaciones:
+    if anulada(m):
+      continue
     momento = datetime.fromisoformat(m["fecha_hora"])
     if momento.date() == ahora.date():  # solo hoy, aunque lleguen marcaciones de otros días
       por_pin.setdefault(m["pin"], []).append(momento)
@@ -204,26 +232,30 @@ def vista_hoy(empleados, marcaciones, ahora: datetime) -> VistaHoy:
   filas = []
   for pin, nombre in nombres.items():
     j = analizar(por_pin.get(pin, []))
-    entrada, salida = j.entrada, j.salida
-    if entrada is None:
+    if not j.validas:
       estado = SIN_MARCAR
-    elif salida is None:
+    elif j.abierta:
       estado = EN_COLEGIO
     else:
       estado = SE_RETIRO
-    horas, parcial, tramo = None, False, None
-    if estado == SE_RETIRO:
-      horas, tramo = salida - entrada, _tramo(entrada, salida, False)
-    elif estado == EN_COLEGIO:
-      horas, parcial = max(timedelta(0), ahora - entrada), True
-      tramo = _tramo(entrada, max(entrada, ahora), True)
+    horas, parcial, tramos = None, False, []
+    if j.validas:
+      horas = j.horas
+      for e, s in j.pares:
+        if s:
+          tramos.append(_tramo(e, s, False))
+        elif en_curso:  # sigue en el colegio: el último tramo llega hasta ahora
+          horas += max(timedelta(0), ahora - e)
+          parcial = True
+          tramos.append(_tramo(e, max(e, ahora), True))
+        else:  # día pasado: se olvidó de marcar la salida
+          tramos.append(_tramo(e, e, False)._replace(falta=True))
     ultima = j.validas[-1] if j.validas else None
     filas.append(FilaHoy(
-      pin=pin, nombre=nombre, estado=estado, entrada=entrada, salida=salida, horas=horas,
+      pin=pin, nombre=nombre, estado=estado, entrada=j.entrada, salida=j.salida, horas=horas,
       horas_parcial=parcial, ultima=f"{ultima:%Y-%m-%d %H:%M:%S}" if ultima else "",
       celda_nueva="salida" if estado == SE_RETIRO else ("entrada" if ultima else ""),
-      repetidas=j.repetidas, tramo=tramo,
-      ticks=[round(_pct(t), 3) for t in j.intermedias if 0 <= _pct(t) <= 100],
+      repetidas=j.repetidas, tramos=tramos,
     ))
 
   def orden(f: FilaHoy):
@@ -236,7 +268,7 @@ def vista_hoy(empleados, marcaciones, ahora: datetime) -> VistaHoy:
   conteos = {"todos": len(filas)}
   for estado in ESTADOS:
     conteos[estado] = sum(1 for f in filas if f.estado == estado)
-  ahora_pct = _pct(ahora)
+  ahora_pct = _pct(ahora) if en_curso else -1.0
   con_marca = [f for f in filas if f.ultima]
   ultima = None
   if con_marca:
